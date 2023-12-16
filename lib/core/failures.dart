@@ -53,7 +53,13 @@ class NewsFailure extends Failure {
   @override
   List<Object> get props => [message];
 }
+class ChatConversationsFailure extends Failure {
+  ChatConversationsFailure(this.message);
+  final String message;
 
+  @override
+  List<Object> get props => [message];
+}
 class AuthenticationFailure extends Failure {
   AuthenticationFailure([String? message])
       : message =
