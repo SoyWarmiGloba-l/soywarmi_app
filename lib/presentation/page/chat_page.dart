@@ -1,7 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:soywarmi_app/utilities/nb_colors.dart';
 import 'package:soywarmi_app/utilities/nb_images.dart';
 import 'package:pusher_client_fixed/pusher_client_fixed.dart';
+import 'package:http/http.dart' as http;
+
 bool isPusherConnected = false;
 
 class ChatPage extends StatefulWidget {
@@ -16,6 +22,8 @@ class _ChatPageState extends State<ChatPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    //GET http://127.0.0.1:8000/api/get_messages/5
+    obtainMessagesConversation();
     connect();
     /*if (!isPusherConnected) {
       connect();
@@ -25,85 +33,96 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void dispose() {
     // channel.unbind(eventName); // Replace with your event name
-    pusher.unsubscribe("evento-mensaje"); // Replace with your channel name
+    pusher.unsubscribe("mensajes-publicos"); // Replace with your channel name
     pusher.disconnect();
     super.dispose();
   }
+  postMessage() async {
+    final _storage = const FlutterSecureStorage();
+    final userToken = await _storage.read(key: 'USER_TOKEN');
+    var response = await http.post(Uri.https(dotenv.env["API_ENDPOINT"]!, "/api/post_message/5", {
+      "content":mensage_input.text
+    }),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          "Authorization": 'Bearer $userToken'
+        });
+    print(response.statusCode);
+    if (response.statusCode == 200) {
+
+    }
+  }
+  obtainMessagesConversation() async {
+    final _storage = const FlutterSecureStorage();
+    final userToken = await _storage.read(key: 'USER_TOKEN');
+    print(userToken);
+    var response = await http.get(Uri.https(dotenv.env["API_ENDPOINT"]!, "/api/get_messages/5", {}),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          "Authorization": 'Bearer $userToken'
+        });
+    if (response.statusCode == 200) {
+      setState(() {
+        final jsonResponse = json.decode(response.body);
+        print(jsonResponse);
+        mensajes=jsonResponse["data"];
+      });
+    }
+  }
+  List mensajes=[];
+  TextEditingController mensage_input=TextEditingController();
   late PusherClient pusher;
   connect() {
-    /*PusherOptions options = PusherOptions(
-      host: '172.18.0.1', //you soketi server ip
-      wsPort: 6001, // port is 6001 by default
-      encrypted: false, // true for use SSL
-      auth: PusherAuth(
-        'http://127.0.0.1:8000/broadcasting/auth', // or you_laravel_endpoint/broadcasting/auth
-        headers: {
-          'Authorization':
-          'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImJlNzgyM2VmMDFiZDRkMmI5NjI3NDE2NThkMjA4MDdlZmVlNmRlNWMiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vc295d2FybWktZTFhZGQiLCJhdWQiOiJzb3l3YXJtaS1lMWFkZCIsImF1dGhfdGltZSI6MTcwMjQ4ODYxNiwidXNlcl9pZCI6Ik9FS0trSWlPQk9RYUNya3dGcW1UajgyNFowRDIiLCJzdWIiOiJPRUtLa0lpT0JPUWFDcmt3RnFtVGo4MjRaMEQyIiwiaWF0IjoxNzAyNDk2MTM0LCJleHAiOjE3MDI0OTk3MzQsImVtYWlsIjoibW9udGFub2o0N0BnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiZmlyZWJhc2UiOnsiaWRlbnRpdGllcyI6eyJlbWFpbCI6WyJtb250YW5vajQ3QGdtYWlsLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6InBhc3N3b3JkIn19.LzxGQ66wicPZzAyngV1Sr2q1c15sU2VqfImzuiYqo2RRM89jjewFOqbU2UInwEDD6Pbs7yZy5gRYMhwGLQix-RsMLdZur2UEoQ4VQc2m1CWp0Ru7SEmQHQow8VzmsO0ULedOkkNquSisOdQXkP2rXmZSBoJ9jJAaXIr85NPPKbodNkOriphHO4BvBswSffOIx_LfjP2PLXAdvAlJyCS3n46gO6dOnWc0WgM3LqY9jzeKQgxg307tYNxbFGChXjTgNKoDK_oJy0xTOs6rehug9UZTEwOiEN2LlLuQYakXbDjGzW1TP_UWjzWA7mxz3u_XOnVEwIq7RpWCey_sYqxAvA', // optional, if using this auth in headers
-        },
-      ),
-    );*/
-
+    print("CONNECT CHAT PAGE NEW");
     pusher = PusherClient(
       'app-key', //default is 'app-key', change to production!
       PusherOptions(
 
-        host: '8bcc-2800-cd0-1602-6f00-195d-fe12-a2ee-683d.ngrok-free.app', //you soketi server ip
+        host: 'cd1c-2800-cd0-1602-6f00-aa0d-8416-5f83-a538.ngrok-free.app', //you soketi server ip
         wssPort: 443,
         wsPort: 80, // port is 6001 by default
         encrypted: true, // true for use SSL
-        auth: PusherAuth(
-          'chilly-owls-decide.loca.lt/broadcasting/auth', // or you_laravel_endpoint/broadcasting/auth
+        /*auth: PusherAuth(
+          'whole-ravens-post.loca.lt/broadcasting/auth', // or you_laravel_endpoint/broadcasting/auth
           headers: {
             'Authorization':
             'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImJlNzgyM2VmMDFiZDRkMmI5NjI3NDE2NThkMjA4MDdlZmVlNmRlNWMiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vc295d2FybWktZTFhZGQiLCJhdWQiOiJzb3l3YXJtaS1lMWFkZCIsImF1dGhfdGltZSI6MTcwMjQ4ODYxNiwidXNlcl9pZCI6Ik9FS0trSWlPQk9RYUNya3dGcW1UajgyNFowRDIiLCJzdWIiOiJPRUtLa0lpT0JPUWFDcmt3RnFtVGo4MjRaMEQyIiwiaWF0IjoxNzAyNDk2MTM0LCJleHAiOjE3MDI0OTk3MzQsImVtYWlsIjoibW9udGFub2o0N0BnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiZmlyZWJhc2UiOnsiaWRlbnRpdGllcyI6eyJlbWFpbCI6WyJtb250YW5vajQ3QGdtYWlsLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6InBhc3N3b3JkIn19.LzxGQ66wicPZzAyngV1Sr2q1c15sU2VqfImzuiYqo2RRM89jjewFOqbU2UInwEDD6Pbs7yZy5gRYMhwGLQix-RsMLdZur2UEoQ4VQc2m1CWp0Ru7SEmQHQow8VzmsO0ULedOkkNquSisOdQXkP2rXmZSBoJ9jJAaXIr85NPPKbodNkOriphHO4BvBswSffOIx_LfjP2PLXAdvAlJyCS3n46gO6dOnWc0WgM3LqY9jzeKQgxg307tYNxbFGChXjTgNKoDK_oJy0xTOs6rehug9UZTEwOiEN2LlLuQYakXbDjGzW1TP_UWjzWA7mxz3u_XOnVEwIq7RpWCey_sYqxAvA', // optional, if using this auth in headers
           },
-        ),
+        ),*/
       ),
       autoConnect: false,
       enableLogging: true,
     );
     String uuid = 'c1fa8fb1-8598-4824-aeb5-fcc05c54ca11';
     pusher.connect();
-    Channel channel = pusher.subscribe("private-mensajes."+uuid);
-    Channel channel2 = pusher.subscribe("mensajes");
     Channel channel3 = pusher.subscribe("mensajes-publicos");
-
     pusher.onConnectionStateChange((state) {
       print(
           "previousState: ${state?.previousState}, currentState: ${state?.currentState}");
       if (state?.currentState == 'CONNECTED') {
+        print("CONNECTING TO PUSHER EVENT");
 
-        channel.bind("evento-mensaje", (PusherEvent? event) {
-          print("ESCUCHANDO EVENTO con ID--------------------------------------------------------------------------------------------------------------");
+        channel3.bind("mensaje-recibido", (PusherEvent? event) {
           print(event?.data);
+          //obtainMessagesConversation();
+          print("Suscripción a 'mensajes-publicos' exitosa");
         });
-        channel2.bind("evento-mensaje", (PusherEvent? event) {
+        /*channel3.bind("pusher:subscription_succeeded", (PusherEvent? event) {
+          obtainMessagesConversation();
+          print("Suscripción a 'mensajes-publicos' exitosa");
+        });*/
+
+        /*channel3.bind("evento-mensaje", (PusherEvent? event) {
           print("ESCUCHANDO EVENTO sin ID--------------------------------------------------------------------------------------------------------------");
+          obtainMessagesConversation();
           print(event?.data);
-        });
-        channel3.bind("evento-mensaje", (PusherEvent? event) {
-          print("ESCUCHANDO EVENTO sin ID--------------------------------------------------------------------------------------------------------------");
-          print(event?.data);
-        });
+        });*/
       }
     });
-    /*String uuid = 'c1fa8fb1-8598-4824-aeb5-fcc05c54ca11';
 
-    Channel channel = pusher.subscribe("private-mensajes"+uuid);
-
-    channel.bind("evento-mensaje", (PusherEvent? event) {
-      print("ESCUCHANDO EVENTO--------------------------------------------------------------------------------------------------------------");
-      print(event?.eventName);
-    });*/
     pusher.onConnectionError((error) {
       print("error: ${error?.exception}  ${error?.code} ${error?.message}");
     });
-
-
-    //Channel channel = pusher.subscribe("private-mensajes.$uuid");
-
-    // Suscribirse al canal "mensajes"
 
 
   }
@@ -143,12 +162,28 @@ class _ChatPageState extends State<ChatPage> {
             child: ClipRRect(
               child: ListView.builder(
                 reverse: true,
-                itemCount: 5,
+                itemCount: mensajes.length,
                 itemBuilder: (context, index) {
                   return Container(
                     margin: const EdgeInsets.only(top: 10),
                     child: Column(
                       children: [
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 5),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              const SizedBox(
+                                width: 40,
+                              ),
+                              Text(
+                                mensajes[index]["email"].toString(),
+                                style: TextStyle(
+                                    color: Colors.grey[400], fontSize: 12),
+                              )
+                            ],
+                          ),
+                        ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.end,
@@ -173,8 +208,8 @@ class _ChatPageState extends State<ChatPage> {
                                     bottomLeft: Radius.circular(0),
                                     bottomRight: Radius.circular(12),
                                   )),
-                              child: const Text(
-                                'Hola, ¿cómo estás?',
+                              child: Text(
+                                mensajes[index]["content"].toString(),
                                 style: TextStyle(
                                     color: Colors.black, fontSize: 16),
                               ),
@@ -190,7 +225,7 @@ class _ChatPageState extends State<ChatPage> {
                                 width: 40,
                               ),
                               Text(
-                                '12:30',
+                                mensajes[index]["created_at"].toString(),
                                 style: TextStyle(
                                     color: Colors.grey[400], fontSize: 12),
                               )
@@ -223,6 +258,7 @@ class _ChatPageState extends State<ChatPage> {
                     children: [
                       Expanded(
                         child: TextField(
+                          controller: mensage_input,
                           decoration: InputDecoration(
                             border: InputBorder.none,
                             hintText: 'Escribe tu mensaje ...',
@@ -237,7 +273,10 @@ class _ChatPageState extends State<ChatPage> {
                             Icons.send,
                             color: Theme.of(context).primaryColor,
                           ),
-                          onPressed: () {},
+                          onPressed: () {
+                            print("Enviando mensaje");
+                            postMessage();
+                          },
                         ),
                       ),
                     ],
