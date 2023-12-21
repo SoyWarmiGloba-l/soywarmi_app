@@ -78,7 +78,7 @@ class _ChatPageState extends State<ChatPage> {
       'app-key', //default is 'app-key', change to production!
       PusherOptions(
 
-        host: 'cd1c-2800-cd0-1602-6f00-aa0d-8416-5f83-a538.ngrok-free.app', //you soketi server ip
+        host: 'a781-2800-cd0-1602-6f00-758-4cd1-1a56-9922.ngrok-free.app', //you soketi server ip
         wssPort: 443,
         wsPort: 80, // port is 6001 by default
         encrypted: true, // true for use SSL
@@ -104,6 +104,7 @@ class _ChatPageState extends State<ChatPage> {
 
         channel3.bind("mensaje-recibido", (PusherEvent? event) {
           print(event?.data);
+          obtainMessagesConversation();
           //obtainMessagesConversation();
           print("Suscripción a 'mensajes-publicos' exitosa");
         });
