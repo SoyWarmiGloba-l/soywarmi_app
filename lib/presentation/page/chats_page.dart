@@ -15,9 +15,10 @@ class ChatsPage extends StatelessWidget {
     return BlocBuilder<GetChatConversationsCubit, GetChatConversationsState>(
       bloc: sl<GetChatConversationsCubit>()..getChatConversations(),
       builder: (context, state){
-        /*if (state is GetChatConversationsLoaded) {
+        if (state is GetChatConversationsLoaded) {
           return ChatConversationsList(chatsList: state.chat_conversations);
         }
+
         if (state is GetChatConversationsError) {
           /*return Center(
             child: Column(
@@ -45,10 +46,6 @@ class ChatsPage extends StatelessWidget {
 
         return const Center(
           child: CircularProgressIndicator(),
-        );*/
-
-        return const SingleChildScrollView(
-          child: Column(children: [ChatCard(), ChatCard(), ChatCard()]),
         );
       }
     );

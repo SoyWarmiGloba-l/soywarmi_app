@@ -20,9 +20,9 @@ class ChatConversationsRepositoryImplementation extends ChatConversationsReposit
 
       final chatConversationsEntity = chatConversationsModel.map((e) {
         return ChatConversationsEntity(
-           id_chat_conversations: e.id_chat_conversations,
+           id_chat_conversations: e.id_chat_conversation,
            name: e.name,
-           type_chat_conversations: e.type_chat_conversations,
+           id_type_chat_conversations: e.id_type_chat_conversations,
         );
       });
 
