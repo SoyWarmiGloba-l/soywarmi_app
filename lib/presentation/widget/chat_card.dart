@@ -16,7 +16,7 @@ class ChatCard extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => ChatPage(this.chatConversation.id_chat_conversations)),
+          MaterialPageRoute(builder: (context) => ChatPage(this.chatConversation)),
         );
       },
       child: Container(

@@ -8,19 +8,21 @@ import 'package:soywarmi_app/utilities/nb_images.dart';
 import 'package:pusher_client_fixed/pusher_client_fixed.dart';
 import 'package:http/http.dart' as http;
 
+import '../../domain/entity/chat_conversations_entity.dart';
+
 bool isPusherConnected = false;
 
 class ChatPage extends StatefulWidget {
-  final int id_chat_conversations;
-  ChatPage(this.id_chat_conversations);
+  final ChatConversationsEntity chatConversation;
+  ChatPage(this.chatConversation);
 
   @override
-  State<ChatPage> createState() => _ChatPageState(this.id_chat_conversations);
+  State<ChatPage> createState() => _ChatPageState(this.chatConversation);
 }
 
 class _ChatPageState extends State<ChatPage> {
-  int id_chat_conversations;
-  _ChatPageState(this.id_chat_conversations);
+  ChatConversationsEntity chatConversation;
+  _ChatPageState(this.chatConversation);
 
   @override
   void initState() {
@@ -44,14 +46,16 @@ class _ChatPageState extends State<ChatPage> {
   postMessage() async {
     final _storage = const FlutterSecureStorage();
     final userToken = await _storage.read(key: 'USER_TOKEN');
-    var response = await http.post(Uri.https(dotenv.env["API_ENDPOINT"]!, "/api/post_message/5", {
-      "content":mensage_input.text
-    }),
+    var response = await http.post(
+        Uri.parse(dotenv.env["API_ENDPOINT"]!+"/api/v1/post_message/"+chatConversation.id_chat_conversations.toString()),
+        body: jsonEncode({
+          "content":mensage_input.text
+        }),
         headers: <String, String>{
           'Content-Type': 'application/json',
           "Authorization": 'Bearer $userToken'
         });
-    print(response.statusCode);
+    print("POST MESSAGE"+response.statusCode.toString());
     if (response.statusCode == 200) {
 
     }
@@ -60,11 +64,14 @@ class _ChatPageState extends State<ChatPage> {
     final _storage = const FlutterSecureStorage();
     final userToken = await _storage.read(key: 'USER_TOKEN');
     print(userToken);
-    var response = await http.get(Uri.https(dotenv.env["API_ENDPOINT"]!, "/api/get_messages/5", {}),
+    var response = await http.get(
+        Uri.parse(dotenv.env["API_ENDPOINT"]!+ "/api/v1/get_messages/"+chatConversation.id_chat_conversations.toString()),
         headers: <String, String>{
           'Content-Type': 'application/json',
           "Authorization": 'Bearer $userToken'
         });
+    print("GET MESSAGE"+response.statusCode.toString());
+
     if (response.statusCode == 200) {
       setState(() {
         final jsonResponse = json.decode(response.body);
@@ -82,7 +89,7 @@ class _ChatPageState extends State<ChatPage> {
       'app-key', //default is 'app-key', change to production!
       PusherOptions(
 
-        host: 'a781-2800-cd0-1602-6f00-758-4cd1-1a56-9922.ngrok-free.app', //you soketi server ip
+        host: '06cd-2800-cd0-1605-3500-201d-34c8-e24e-41fc.ngrok-free.app', //you soketi server ip
         wssPort: 443,
         wsPort: 80, // port is 6001 by default
         encrypted: true, // true for use SSL
@@ -99,18 +106,18 @@ class _ChatPageState extends State<ChatPage> {
     );
     String uuid = 'c1fa8fb1-8598-4824-aeb5-fcc05c54ca11';
     pusher.connect();
-    Channel channel3 = pusher.subscribe("mensajes-publicos");
+    Channel channel3 = pusher.subscribe("mensajes."+chatConversation.id_chat_conversations.toString());
     pusher.onConnectionStateChange((state) {
       print(
           "previousState: ${state?.previousState}, currentState: ${state?.currentState}");
       if (state?.currentState == 'CONNECTED') {
         print("CONNECTING TO PUSHER EVENT");
 
-        channel3.bind("mensaje-recibido", (PusherEvent? event) {
+        channel3.bind("registro-mensaje", (PusherEvent? event) {
           print(event?.data);
           obtainMessagesConversation();
           //obtainMessagesConversation();
-          print("Suscripción a 'mensajes-publicos' exitosa");
+          print("Suscripción a 'mensajes de "+chatConversation.id_chat_conversations.toString());
         });
         /*channel3.bind("pusher:subscription_succeeded", (PusherEvent? event) {
           obtainMessagesConversation();
@@ -151,14 +158,13 @@ class _ChatPageState extends State<ChatPage> {
             Padding(
                 padding: const EdgeInsets.only(right: 8, left: 8),
                 child: Text(
-                  'Dr. Juan Sebastian',
+                  this.chatConversation.name,
                   style: TextStyle(color: Theme.of(context).primaryColor),
                 )),
           ]),
         ),
       ),
       body: Column(children: [
-        Text('${this.id_chat_conversations}'),
         Expanded(
           child: Container(
             padding: const EdgeInsets.only(left: 10, right: 10),
