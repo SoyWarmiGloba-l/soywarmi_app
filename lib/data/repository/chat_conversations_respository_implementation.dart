@@ -23,6 +23,9 @@ class ChatConversationsRepositoryImplementation extends ChatConversationsReposit
            id_chat_conversations: e.id_chat_conversation,
            name: e.name,
            id_type_chat_conversations: e.id_type_chat_conversations,
+          last_message:e.last_message,
+          last_message_date: e.last_message_date,
+          unread_messages_count: e.unread_messages_count
         );
       });
 

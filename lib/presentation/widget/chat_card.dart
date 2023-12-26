@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:soywarmi_app/domain/entity/chat_conversations_entity.dart';
 import 'package:soywarmi_app/presentation/page/chat_page.dart';
 import 'package:soywarmi_app/utilities/nb_colors.dart';
 import 'package:soywarmi_app/utilities/nb_images.dart';
 
 class ChatCard extends StatelessWidget {
-  const ChatCard({super.key});
+
+  final ChatConversationsEntity chatConversation;
+
+  ChatCard(this.chatConversation);
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +16,7 @@ class ChatCard extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const ChatPage()),
+          MaterialPageRoute(builder: (context) => ChatPage(this.chatConversation.id_chat_conversations)),
         );
       },
       child: Container(
@@ -34,14 +38,14 @@ class ChatCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
-                'Miguel Villa',
+              Text(
+                chatConversation.name,
                 style: TextStyle(
                   fontSize: 18,
                 ),
               ),
               Text(
-                'Hola, soy nuevo en la comunidad',
+                (chatConversation.last_message==null)?"":chatConversation.last_message.toString(),
                 style: TextStyle(
                   fontSize: 14,
                   color: Theme.of(context).primaryColor.withOpacity(0.5),
@@ -56,6 +60,7 @@ class ChatCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                (chatConversation.unread_messages_count!=0)?
                 Container(
                   padding: const EdgeInsets.all(1),
                   decoration: BoxDecoration(
@@ -66,18 +71,18 @@ class ChatCard extends StatelessWidget {
                     minWidth: 18,
                     minHeight: 18,
                   ),
-                  child: const Text(
-                    '1',
+                  child: Text(
+                    chatConversation.unread_messages_count.toString(),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 12,
                     ),
                     textAlign: TextAlign.center,
                   ),
-                ),
+                ):Container(),
                 const SizedBox(height: 8),
                 Text(
-                  '12:00',
+                    (chatConversation.last_message_date==null)?"":chatConversation.last_message_date.toString(),
                   style: TextStyle(
                     fontSize: 12,
                     color: Theme.of(context).primaryColor.withOpacity(0.5),

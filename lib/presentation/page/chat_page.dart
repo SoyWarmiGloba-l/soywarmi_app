@@ -11,13 +11,17 @@ import 'package:http/http.dart' as http;
 bool isPusherConnected = false;
 
 class ChatPage extends StatefulWidget {
-  const ChatPage({super.key});
+  final int id_chat_conversations;
+  ChatPage(this.id_chat_conversations);
 
   @override
-  State<ChatPage> createState() => _ChatPageState();
+  State<ChatPage> createState() => _ChatPageState(this.id_chat_conversations);
 }
 
 class _ChatPageState extends State<ChatPage> {
+  int id_chat_conversations;
+  _ChatPageState(this.id_chat_conversations);
+
   @override
   void initState() {
     // TODO: implement initState
@@ -154,6 +158,7 @@ class _ChatPageState extends State<ChatPage> {
         ),
       ),
       body: Column(children: [
+        Text('${this.id_chat_conversations}'),
         Expanded(
           child: Container(
             padding: const EdgeInsets.only(left: 10, right: 10),

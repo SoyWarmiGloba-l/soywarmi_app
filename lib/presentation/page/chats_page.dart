@@ -20,7 +20,7 @@ class ChatsPage extends StatelessWidget {
         }
 
         if (state is GetChatConversationsError) {
-          /*return Center(
+          return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -38,10 +38,8 @@ class ChatsPage extends StatelessWidget {
                 ),
               ],
             ),
-          );*/
-          return const SingleChildScrollView(
-            child: Column(children: [ChatCard(), ChatCard(), ChatCard()]),
           );
+
         }
 
         return const Center(
@@ -63,7 +61,7 @@ class ChatConversationsList extends StatelessWidget {
     return ListView.builder(
       itemCount: chatsList.length,
       itemBuilder: (context, index) {
-        return ChatCard();
+        return ChatCard(chatsList[index]);
       },
     );
   }
