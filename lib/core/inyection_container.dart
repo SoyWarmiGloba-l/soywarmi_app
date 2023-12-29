@@ -6,6 +6,7 @@ import 'package:soywarmi_app/data/remote/faqs_remote_data_source.dart';
 import 'package:soywarmi_app/data/remote/medical_center_remote_data_source.dart';
 import 'package:soywarmi_app/data/remote/news_remote_data_source.dart';
 import 'package:soywarmi_app/data/remote/team_remote_data_source.dart';
+import 'package:soywarmi_app/data/remote/user_remote_data_source.dart';
 import 'package:soywarmi_app/data/repository/activity_repository_implementation.dart';
 import 'package:soywarmi_app/data/repository/chat_conversations_respository_implementation.dart';
 import 'package:soywarmi_app/data/repository/doctor_repository_implementation.dart';
@@ -20,6 +21,7 @@ import 'package:soywarmi_app/domain/repository/faqs_repository.dart';
 import 'package:soywarmi_app/domain/repository/medical_center_repository.dart';
 import 'package:soywarmi_app/domain/repository/news_repository.dart';
 import 'package:soywarmi_app/domain/repository/team_repository.dart';
+import 'package:soywarmi_app/domain/repository/user_repository.dart';
 import 'package:soywarmi_app/domain/usescase/activity/get_activity_usecase.dart';
 import 'package:soywarmi_app/domain/usescase/chat_conversations/get_chat_conversations_usecase.dart';
 import 'package:soywarmi_app/domain/usescase/doctor/get_doctor_usecase.dart';
@@ -34,6 +36,10 @@ import 'package:soywarmi_app/presentation/bloc/faqs/get_faqs_cubit.dart';
 import 'package:soywarmi_app/presentation/bloc/medical_centers/get_medical_centers_cubit.dart';
 import 'package:soywarmi_app/presentation/bloc/news/get_news_cubit.dart';
 import 'package:soywarmi_app/presentation/bloc/team/get_teams_cubit.dart';
+
+import '../data/repository/users_repository_implementation.dart';
+import '../domain/usescase/users/get_users_usecase.dart';
+import '../presentation/bloc/user/get_users_cubit.dart';
 
 final sl = GetIt.instance;
 
@@ -57,6 +63,8 @@ Future<void> init() async {
 
   sl.registerFactory<ChatConversationsDataSource>(() => ChatConversationsDataSourceImplementation());
 
+  sl.registerFactory<UserRemoteDataSource>(() => UserRemoteDataSourceImplementation());
+
   //Repository
 
   sl.registerFactory<DoctorRepository>(
@@ -77,6 +85,7 @@ Future<void> init() async {
 
   sl.registerFactory<ChatConversationsRepository>(() => ChatConversationsRepositoryImplementation(chatConversationsDataSource: sl()));
 
+  sl.registerFactory<UserRepository>(() => UsersRepositoryImplementation(userRemoteDataSource: sl()));
 
   //UseCase
 
@@ -98,6 +107,9 @@ Future<void> init() async {
 
   sl.registerFactory<GetChatConversationsUseCase>(() => GetChatConversationsUseCase(chatConversationsRepository: sl()));
 
+  sl.registerFactory<GetUsersUseCase>(() => GetUsersUseCase(userRepository: sl()));
+
+
   //Bloc
 
   sl.registerSingleton<GetDoctorCubit>(GetDoctorCubit(getDoctorUseCase: sl()));
@@ -115,4 +127,5 @@ Future<void> init() async {
 
   sl.registerSingleton<GetChatConversationsCubit>(GetChatConversationsCubit(getChatConversationsUseCase: sl()));
 
+  sl.registerSingleton<GetUsersCubit>(GetUsersCubit(getUsersUseCase: sl()));
 }

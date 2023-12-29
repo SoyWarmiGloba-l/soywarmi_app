@@ -89,7 +89,7 @@ class _ChatPageState extends State<ChatPage> {
       'app-key', //default is 'app-key', change to production!
       PusherOptions(
 
-        host: '06cd-2800-cd0-1605-3500-201d-34c8-e24e-41fc.ngrok-free.app', //you soketi server ip
+        host: '05d4-2800-cd0-1605-3500-e418-93b3-dbf9-5a74.ngrok-free.app', //you soketi server ip
         wssPort: 443,
         wsPort: 80, // port is 6001 by default
         encrypted: true, // true for use SSL

@@ -30,7 +30,13 @@ class ActivityFailure extends Failure {
   @override
   List<Object> get props => [message];
 }
+class UserFailure extends Failure {
+  UserFailure(this.message);
+  final String message;
 
+  @override
+  List<Object> get props => [message];
+}
 class FaqsFailure extends Failure {
   FaqsFailure(this.message);
   final String message;

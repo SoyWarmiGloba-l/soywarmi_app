@@ -1,11 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:soywarmi_app/data/model/user_model.dart';
+import 'package:soywarmi_app/data/model/user_model_auth.dart';
 
 abstract class AuthenticationFirebaseRemoteDataSource {
   Stream<bool> get isAuthenticated;
 
-  Future<UserModel?> get user;
+  Future<UserModelAuth?> get user;
 
   Future<void> sendPasswordResetEmail(String email);
 
@@ -45,11 +45,11 @@ class AuthenticationFirebaseRemoteDataSourceImplementation
   }
 
   @override
-  Future<UserModel?> get user async {
+  Future<UserModelAuth?> get user async {
     final user = _firebaseAuth.currentUser;
     print('User token ${await user?.getIdToken()}');
     if (user != null) {
-      return UserModel(
+      return UserModelAuth(
         id: user.uid,
         email: user.email!,
         password: '',
