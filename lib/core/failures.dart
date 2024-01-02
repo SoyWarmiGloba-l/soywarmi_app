@@ -22,7 +22,16 @@ class TeamFailure extends Failure {
   @override
   List<Object> get props => [message];
 }
+class CreateChatConversationFailure extends Failure {
+  CreateChatConversationFailure([String? message])
+      : message =
+      message ?? 'Ha ocurrido un error inesperado, inténtelo de nuevo.';
+  final String message;
 
+  @override
+  List<Object> get props => [message];
+
+}
 class ActivityFailure extends Failure {
   ActivityFailure(this.message);
   final String message;

@@ -3,9 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/inyection_container.dart';
 import '../../domain/entity/user_entity.dart';
+import '../bloc/chat_conversations/create_chat_conversations_cubit.dart';
+import '../bloc/chat_conversations/create_chat_conversations_state.dart';
 import '../bloc/team/get_teams_cubit.dart';
 import '../bloc/user/get_users_cubit.dart';
 import '../bloc/user/get_users_state.dart';
+import 'chat_page.dart';
 
 
 class SearchPersonToChat extends StatefulWidget {
@@ -59,11 +62,39 @@ class _SearchPersonToChatState extends State<SearchPersonToChat> {
                       return ListView.builder(
                         itemCount: filteredPeople.length,
                         itemBuilder: (context, index) {
-                          return ListTile(
-                            title: Text(filteredPeople[index].email),
-                            onTap: () {
-                              _showPersonName(context, filteredPeople[index].id);
-                            },
+                          return Container(
+                            child: BlocConsumer<CreateChatConversationCubit, CreateChatConversationsState>(
+                              listener: (context,state){
+                                if (state is CreateChatConversationsFailed) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(state.message),
+                                      backgroundColor: Theme.of(context).colorScheme.error,
+                                    ),
+                                  );
+                                }
+                                print("STATE----------------------------------------------------------------------------------------");
+                                print(state);
+                                if (state is CreateChatConversationsSuccess) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => ChatPage(state.id,filteredPeople[index].email)),
+                                  );
+                                  /*context
+                          .read<AuthenticationBloc>()
+                          .add(const AuthenticationStatusChanged(true));*/
+                                }
+
+                              },
+                              builder: (context,state){
+                                return ListTile(
+                                  title: Text(filteredPeople[index].email),
+                                  onTap: () {
+                                    _showPersonName(context, filteredPeople[index].id);
+                                  },
+                                );
+                              }
+                            ),
                           );
                         },
                       );

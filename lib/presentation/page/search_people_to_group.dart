@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:soywarmi_app/presentation/bloc/chat_conversations/create_chat_conversations_cubit.dart';
+import 'package:soywarmi_app/presentation/bloc/chat_conversations/create_chat_conversations_state.dart';
 import 'package:soywarmi_app/presentation/bloc/user/get_users_cubit.dart';
 import 'package:soywarmi_app/presentation/bloc/user/get_users_state.dart';
 
 import '../../core/inyection_container.dart';
 import '../../domain/entity/user_entity.dart';
+import 'chat_page.dart';
 
 class Person {
   String name;
@@ -90,11 +93,35 @@ class _SearchPeopleToGroupState extends State<SearchPeopleToGroup> {
                   },
                 ),
               ),
-              ElevatedButton(
-                onPressed: () {
-                  _showCreateGroupDialog();
+              BlocConsumer<CreateChatConversationCubit, CreateChatConversationsState>(
+                bloc: sl<CreateChatConversationCubit>(),
+                listener: (context,state){
+                  if (state is CreateChatConversationsFailed) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(state.message),
+                        backgroundColor: Theme.of(context).colorScheme.error,
+                      ),
+                    );
+                  }
+                  print("STATE----------------------------------------------------------------------------------------");
+                  print(state);
+                  if (state is CreateChatConversationsSuccess) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ChatPage(state.id,groupNameController.text)),
+                    );
+                  }
+
                 },
-                child: const Text('Crear Grupo'),
+                builder: (context,state){
+                  return ElevatedButton(
+                    onPressed: () {
+                      _showCreateGroupDialog();
+                    },
+                    child: const Text('Crear Grupo'),
+                  );
+                }
               ),
             ],
           ),
@@ -152,12 +179,17 @@ class _SearchPeopleToGroupState extends State<SearchPeopleToGroup> {
   }
 
   void _createGroup() {
-    List<dynamic> selectedPeople = users.where((person) => person.isSelected).toList();
+    List<String> id_users =[];
     String groupName = groupNameController.text;
-    print('Nombre del Grupo: $groupName');
-    print('Integrantes:');
-    for (var person in selectedPeople) {
-      print(person.name);
+    for (var person in filteredPeople) {
+      if(person["isSelected"]){
+        id_users.add(person["id"].toString());
+      }
     }
+    sl<CreateChatConversationCubit>().createChatConversation(
+      name: groupName,
+      users: id_users
+    );
+
   }
 }

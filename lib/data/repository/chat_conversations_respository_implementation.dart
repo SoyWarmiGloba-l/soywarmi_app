@@ -38,4 +38,14 @@ class ChatConversationsRepositoryImplementation extends ChatConversationsReposit
     }
   }
 
+  @override
+  Future<Either<CreateChatConversationFailure, String>> createChatConversation({String? name, List<String>? users}) async {
+    try {
+      final result = await chatConversationsDataSource.createChatConversation(name,users);
+      return Right(result);
+    } on Exception catch (e) {
+      return Left(CreateChatConversationFailure(e.toString()));
+    }
+  }
+
 }

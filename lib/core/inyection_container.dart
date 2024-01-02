@@ -23,6 +23,7 @@ import 'package:soywarmi_app/domain/repository/news_repository.dart';
 import 'package:soywarmi_app/domain/repository/team_repository.dart';
 import 'package:soywarmi_app/domain/repository/user_repository.dart';
 import 'package:soywarmi_app/domain/usescase/activity/get_activity_usecase.dart';
+import 'package:soywarmi_app/domain/usescase/chat_conversations/create_chat_conversations_usecase.dart';
 import 'package:soywarmi_app/domain/usescase/chat_conversations/get_chat_conversations_usecase.dart';
 import 'package:soywarmi_app/domain/usescase/doctor/get_doctor_usecase.dart';
 import 'package:soywarmi_app/domain/usescase/faqs/get_faqs_usecase.dart';
@@ -30,6 +31,7 @@ import 'package:soywarmi_app/domain/usescase/medical_centers/get_medical_centers
 import 'package:soywarmi_app/domain/usescase/news/get_news_usecase.dart';
 import 'package:soywarmi_app/domain/usescase/team/get_teams_usecase.dart';
 import 'package:soywarmi_app/presentation/bloc/activity/get_activity_cubit.dart';
+import 'package:soywarmi_app/presentation/bloc/chat_conversations/create_chat_conversations_cubit.dart';
 import 'package:soywarmi_app/presentation/bloc/chat_conversations/get_chat_conversations_cubit.dart';
 import 'package:soywarmi_app/presentation/bloc/doctor/get_doctor_cubit.dart';
 import 'package:soywarmi_app/presentation/bloc/faqs/get_faqs_cubit.dart';
@@ -64,6 +66,7 @@ Future<void> init() async {
   sl.registerFactory<ChatConversationsDataSource>(() => ChatConversationsDataSourceImplementation());
 
   sl.registerFactory<UserRemoteDataSource>(() => UserRemoteDataSourceImplementation());
+
 
   //Repository
 
@@ -109,6 +112,7 @@ Future<void> init() async {
 
   sl.registerFactory<GetUsersUseCase>(() => GetUsersUseCase(userRepository: sl()));
 
+  sl.registerFactory<CreateChatConversationsUseCase>(() => CreateChatConversationsUseCase(chatConversationsRepository: sl()));
 
   //Bloc
 
@@ -128,4 +132,7 @@ Future<void> init() async {
   sl.registerSingleton<GetChatConversationsCubit>(GetChatConversationsCubit(getChatConversationsUseCase: sl()));
 
   sl.registerSingleton<GetUsersCubit>(GetUsersCubit(getUsersUseCase: sl()));
+
+  sl.registerSingleton<CreateChatConversationCubit>(CreateChatConversationCubit(createChatConversationsUseCase: sl()));
+
 }

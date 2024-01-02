@@ -13,16 +13,18 @@ import '../../domain/entity/chat_conversations_entity.dart';
 bool isPusherConnected = false;
 
 class ChatPage extends StatefulWidget {
-  final ChatConversationsEntity chatConversation;
-  ChatPage(this.chatConversation);
+  final String id;
+  final String name;
+  ChatPage(this.id,this.name);
 
   @override
-  State<ChatPage> createState() => _ChatPageState(this.chatConversation);
+  State<ChatPage> createState() => _ChatPageState(this.id,this.name);
 }
 
 class _ChatPageState extends State<ChatPage> {
-  ChatConversationsEntity chatConversation;
-  _ChatPageState(this.chatConversation);
+  final String id;
+  final String name;
+  _ChatPageState(this.id,this.name);
 
   @override
   void initState() {
@@ -47,7 +49,7 @@ class _ChatPageState extends State<ChatPage> {
     final _storage = const FlutterSecureStorage();
     final userToken = await _storage.read(key: 'USER_TOKEN');
     var response = await http.post(
-        Uri.parse(dotenv.env["API_ENDPOINT"]!+"/api/v1/post_message/"+chatConversation.id_chat_conversations.toString()),
+        Uri.parse(dotenv.env["API_ENDPOINT"]!+"/api/v1/post_message/"+id),
         body: jsonEncode({
           "content":mensage_input.text
         }),
@@ -65,7 +67,7 @@ class _ChatPageState extends State<ChatPage> {
     final userToken = await _storage.read(key: 'USER_TOKEN');
     print(userToken);
     var response = await http.get(
-        Uri.parse(dotenv.env["API_ENDPOINT"]!+ "/api/v1/get_messages/"+chatConversation.id_chat_conversations.toString()),
+        Uri.parse(dotenv.env["API_ENDPOINT"]!+ "/api/v1/get_messages/"+id),
         headers: <String, String>{
           'Content-Type': 'application/json',
           "Authorization": 'Bearer $userToken'
@@ -89,7 +91,7 @@ class _ChatPageState extends State<ChatPage> {
       'app-key', //default is 'app-key', change to production!
       PusherOptions(
 
-        host: '05d4-2800-cd0-1605-3500-e418-93b3-dbf9-5a74.ngrok-free.app', //you soketi server ip
+        host: '804f-2800-cd0-1605-3500-bacf-d19-b338-ac8b.ngrok-free.app', //you soketi server ip
         wssPort: 443,
         wsPort: 80, // port is 6001 by default
         encrypted: true, // true for use SSL
@@ -106,7 +108,7 @@ class _ChatPageState extends State<ChatPage> {
     );
     String uuid = 'c1fa8fb1-8598-4824-aeb5-fcc05c54ca11';
     pusher.connect();
-    Channel channel3 = pusher.subscribe("mensajes."+chatConversation.id_chat_conversations.toString());
+    Channel channel3 = pusher.subscribe("mensajes."+id);
     pusher.onConnectionStateChange((state) {
       print(
           "previousState: ${state?.previousState}, currentState: ${state?.currentState}");
@@ -117,7 +119,7 @@ class _ChatPageState extends State<ChatPage> {
           print(event?.data);
           obtainMessagesConversation();
           //obtainMessagesConversation();
-          print("Suscripción a 'mensajes de "+chatConversation.id_chat_conversations.toString());
+          print("Suscripción a 'mensajes de "+id);
         });
         /*channel3.bind("pusher:subscription_succeeded", (PusherEvent? event) {
           obtainMessagesConversation();
@@ -158,7 +160,7 @@ class _ChatPageState extends State<ChatPage> {
             Padding(
                 padding: const EdgeInsets.only(right: 8, left: 8),
                 child: Text(
-                  this.chatConversation.name,
+                  this.name,
                   style: TextStyle(color: Theme.of(context).primaryColor),
                 )),
           ]),

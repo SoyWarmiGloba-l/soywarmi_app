@@ -10,6 +10,7 @@ import 'http_headers_global.dart';
 
 abstract class ChatConversationsDataSource {
   Future<List<ChatConversationsModel>> getChatConversations();
+  Future<String> createChatConversation(String? name,List<String>? users);
 
 }
 
@@ -37,4 +38,25 @@ class ChatConversationsDataSourceImplementation extends ChatConversationsDataSou
       throw Exception('Error al obtener los datos');
     }
   }
+
+  @override
+  Future<String> createChatConversation(String? name, List<String>? users) async {
+    final userToken = await _storage.read(key: 'USER_TOKEN');
+    final req = await HttpHeadersGlobal.headerPostHttpWithToken(
+        userToken, '$_endPoint/api/v1/register_chat_conversation',
+        json.encode({
+          "name":name,
+          "users":users
+        })
+    );
+
+    if (req.statusCode == 200) {
+      final newsResponse = jsonDecode(req.body);
+      final String id = newsResponse['data'];
+      return id;
+    } else {
+      throw Exception('Error al obtener los datos');
+    }
+  }
+
 }
