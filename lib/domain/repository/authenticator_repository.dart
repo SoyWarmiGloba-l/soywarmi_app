@@ -9,8 +9,10 @@ abstract class AuthenticatorRepository {
     String? password,
   });
 
-  Future<Either<AuthenticationFailure, void>> signUp({
-    UserEntity? user,
+  Future<Either<RegisterFailure, void>> signUp({
+    String? nombre,
+    String? apellido,
+    String? email,
     String? password,
   });
 }

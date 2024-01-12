@@ -40,9 +40,12 @@ class AuthenticationBloc
     AuthenticationStatusChanged event,
     Emitter<AuthenticationState> emit,
   ) async {
+    print("Evento on authentication status changed");
+    print(event.isAuthenticated);
     if (event.isAuthenticated) {
       final getUserResult =
           await _readUserAuthenticationStateUseCase.call(NoParams());
+      print(getUserResult);
       getUserResult.fold(
         (error) => emit(const Unauthenticated()),
         (user) {

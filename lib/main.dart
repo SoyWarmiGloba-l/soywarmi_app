@@ -120,6 +120,8 @@ class _FirstPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<AuthenticationBloc, AuthenticationState>(
       builder: (context, state) {
+        print("AUTH BLOC");
+        print(state);
         if (state is Authenticated) {
           return const MainPage();
         }

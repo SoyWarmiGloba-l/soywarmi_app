@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:soywarmi_app/core/inyection_container.dart';
 import 'package:soywarmi_app/domain/entity/medical_center_entity.dart';
 import 'package:soywarmi_app/presentation/bloc/medical_centers/get_medical_centers_cubit.dart';
@@ -16,6 +18,8 @@ class MapPage extends StatefulWidget {
   State<MapPage> createState() => _MapPageState();
 }
 
+LatLng camaraPosition = LatLng(-17.419869, -66.129660);
+
 class _MapPageState extends State<MapPage> {
   late GoogleMapController mapController;
   final default_position = const LatLng(-17.419869, -66.129660);
@@ -24,6 +28,127 @@ class _MapPageState extends State<MapPage> {
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _checkLocationPermission();
+  }
+
+  void _showCityModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).primaryColorLight,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SizedBox(
+                height: constraints.maxHeight,
+                child: Center(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        const Align(
+                          alignment: AlignmentDirectional.topCenter,
+                          child: Padding(
+                            padding: EdgeInsets.all(8),
+                            child: Text(
+                              'Cambia de ciudad',
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: NBSecondPrimaryColor,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          margin: const EdgeInsets.only(left: 20, right: 20),
+                          child: Column(
+                            children: generateCountryButtons(),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  List<Widget> generateCountryButtons() {
+    List<Widget> buttons = [];
+    final List<Map<String, dynamic>> ciudades = [
+      {"nombre": "La paz", "latitud": -16.5, "longitud": -68.15},
+      {"nombre": "Oruro", "latitud": -17.9833, "longitud": -67.1500},
+      {"nombre": "Potosi", "latitud": -19.5667, "longitud": -65.7500},
+      {"nombre": "Cochabamba", "latitud": -17.3895, "longitud": -66.1568},
+      {"nombre": "Chuquisaca", "latitud": -19.0428, "longitud": -65.2594},
+      {"nombre": "Tarija", "latitud": -21.5355, "longitud": -64.7296},
+      {"nombre": "Santa Cruz", "latitud": -17.8146, "longitud": -63.1561},
+      {"nombre": "Beni", "latitud": -14.8245, "longitud": -64.8992},
+      {"nombre": "Pando", "latitud": -10.9419, "longitud": -66.9980}
+    ];
+    for (var data in ciudades) {
+      buttons.add(const Divider(
+        thickness: 1,
+      ));
+      buttons.add(
+          countryButton(data["latitud"], data["longitud"], data["nombre"]));
+    }
+    return buttons;
+  }
+
+  Widget countryButton(double lat, double long, String name) {
+    return TextButton(
+      onPressed: () {
+        setState(() {
+          camaraPosition = new LatLng(lat, long);
+          Navigator.pop(context);
+        });
+      },
+      child: Text(name),
+    );
+  }
+
+  Future<void> _checkLocationPermission() async {
+    if (await Permission.location.isGranted) {
+      _getCurrentLocation();
+    } else {
+      await Permission.location.request();
+      if (await Permission.location.isGranted) {
+        _getCurrentLocation();
+      } else {
+        print('Permiso de ubicación denegado');
+      }
+    }
+  }
+
+  Future<void> _getCurrentLocation() async {
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      print(position.latitude);
+      print(position.longitude);
+      setState(() {
+        camaraPosition = LatLng(position.latitude, position.longitude);
+      });
+    } catch (e) {
+      print('Error al obtener la ubicación: $e');
+    }
   }
 
   @override
@@ -265,10 +390,13 @@ class _MapPageState extends State<MapPage> {
           return Stack(
             children: [
               GoogleMap(
-                  onMapCreated: _onMapCreated,
-                  markers: markers,
-                  initialCameraPosition: const CameraPosition(
-                      target: LatLng(-64.357902, -33.797913), zoom: 13)),
+                onMapCreated: _onMapCreated,
+                markers: markers,
+                initialCameraPosition: CameraPosition(
+                  target: camaraPosition,
+                  zoom: 15.0,
+                ),
+              ),
               Positioned(
                 left: 0,
                 right: width * 0.6,
@@ -287,6 +415,8 @@ class _MapPageState extends State<MapPage> {
                     ),
                     onPressed: () async {
                       _showCityModal(context);
+                      final res = FaqsRemoteDataSourceImplementation();
+                      final data = res.getFaqs();
                     },
                     child: const Text(
                       'Cambiar ciudad',

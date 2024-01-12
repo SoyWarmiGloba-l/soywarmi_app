@@ -13,14 +13,18 @@ class SignUpUseCase extends FutureUsesCase<void, SignUpParams> {
   @override
   Future<Either<Failure, void>> call(SignUpParams params) {
     return _authenticatorRepository.signUp(
-      user: params.user,
-      password: params.password,
+      nombre: params.nombre,
+      apellido: params.apellido,
+      email:params.email,
+      password:params.password
     );
   }
 }
 
 class SignUpParams {
-  const SignUpParams({this.user, this.password});
-  final UserEntity? user;
+  const SignUpParams({this.nombre,this.apellido,this.email, this.password});
+  final String? nombre;
+  final String? apellido;
   final String? password;
+  final String? email;
 }

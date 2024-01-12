@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:soywarmi_app/data/remote/user_public_general_remote_data_source.dart';
 
 abstract class AuthenticatorFirebaseRemoteDataSource {
   AuthenticatorFirebaseRemoteDataSource()
@@ -9,7 +12,7 @@ abstract class AuthenticatorFirebaseRemoteDataSource {
 
   final FirebaseAuth _firebaseAuth;
 
-  Future<void> signUp();
+  Future<void> signUp({String? nombre, String? apellido,String? email,String? password});
 
   Future<void> signIn({String? email, String? password});
 }
@@ -46,9 +49,34 @@ class EmailAuthenticatorFirebaseRemoteDataSourceImplementation
   }
 
   @override
-  Future<void> signUp() {
-    // TODO: implement signUp
-    throw UnimplementedError();
+  Future<void> signUp({String? nombre, String? apellido,String? email,String? password}) async {
+    if (email == null || password == null || nombre==null || apellido==null) {
+      throw Exception('Error: User and password not provided');
+    }
+
+    UserCredential userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+    final userToken = await userCredential.user!.getIdToken();
+    if(userCredential.user?.uid != null){
+      UserPublicGeneralRemoteDataSourceImplementation upgrds=new UserPublicGeneralRemoteDataSourceImplementation();
+        Map<String, dynamic> jsonData = {
+          "id":userCredential.user?.uid,
+          "name": '${nombre} ${apellido}',
+          "email": email,
+          "password": password,
+        };
+        String encode=jsonEncode(jsonData);
+        upgrds.postUser(encode);
+
+      await storage.write(key: 'USER_TOKEN', value: userToken);
+    }
+
+
+    if (userCredential.user == null) {
+      throw Exception('Error: User cannot be register');
+    }
   }
 }
 
@@ -94,7 +122,7 @@ class GoogleAuthenticatorFirebaseRemoteDataSourceImplementation
   }
 
   @override
-  Future<void> signUp() {
+  Future<void> signUp({String? nombre, String? apellido,String? email,String? password}) {
     // TODO: implement signUp
     throw UnimplementedError();
   }
