@@ -4,12 +4,15 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:soywarmi_app/core/inyection_container.dart';
+import 'package:soywarmi_app/data/remote/faqs_remote_data_source.dart';
 import 'package:soywarmi_app/domain/entity/medical_center_entity.dart';
 import 'package:soywarmi_app/presentation/bloc/medical_centers/get_medical_centers_cubit.dart';
 import 'package:soywarmi_app/presentation/bloc/medical_centers/get_medical_centers_state.dart';
 import 'package:soywarmi_app/presentation/page/medical_center_info.dart';
 
 import 'package:soywarmi_app/utilities/nb_colors.dart';
+
+import '../widget/custom_maker.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -34,6 +37,10 @@ class _MapPageState extends State<MapPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    BitmapDescriptor.fromAssetImage(
+        const ImageConfiguration(devicePixelRatio: 2.5),
+        'assets/images/hospital_icon.png')
+        .then((value) => iconMarkerImage = value);
     _checkLocationPermission();
   }
 
@@ -141,8 +148,6 @@ class _MapPageState extends State<MapPage> {
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
-      print(position.latitude);
-      print(position.longitude);
       setState(() {
         camaraPosition = LatLng(position.latitude, position.longitude);
       });
@@ -151,14 +156,6 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
-  @override
-  void initState() {
-    BitmapDescriptor.fromAssetImage(
-            const ImageConfiguration(devicePixelRatio: 2.5),
-            'assets/images/hospital_icon.png')
-        .then((value) => iconMarkerImage = value);
-    super.initState();
-  }
 
   List<Map<String, dynamic>> cities = [
     {
@@ -294,7 +291,7 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
-  void _showCityModal(
+  /*void _showCityModal(
     BuildContext context,
   ) {
     showModalBottomSheet(
@@ -359,8 +356,8 @@ class _MapPageState extends State<MapPage> {
         );
       },
     );
-  }
-
+  }*/
+  List<Marker> markersList=[];
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
@@ -369,29 +366,13 @@ class _MapPageState extends State<MapPage> {
       bloc: sl<GetMedicalCentersCubit>()..getMedicalCenters(),
       builder: (context, state) {
         if (state is GetMedicalCentersLoaded) {
-          final medicalCenters = state.medicalCenters;
-          final markers = medicalCenters.map((e) {
-            final LatLng position = LatLng(e.latitude, e.longitude);
-            return Marker(
-              markerId: MarkerId(e.id.toString()),
-              position: position,
-              onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            MedicalCenterInfo(medicalCenter: e)));
-              },
-              infoWindow: InfoWindow(
-                title: e.name,
-              ),
-            );
-          }).toSet();
+          obtenerMarkers(state.medicalCenters);
+
           return Stack(
             children: [
               GoogleMap(
                 onMapCreated: _onMapCreated,
-                markers: markers,
+                markers: markersList.toSet(),
                 initialCameraPosition: CameraPosition(
                   target: camaraPosition,
                   zoom: 15.0,
@@ -442,7 +423,7 @@ class _MapPageState extends State<MapPage> {
                       ),
                     ),
                     onPressed: () async {
-                      _showModalNearestHospitalsl(context, medicalCenters);
+                      _showModalNearestHospitalsl(context, state.medicalCenters);
                     },
                     child: const Text(
                       'Mostrar mas cercanos',
@@ -476,6 +457,14 @@ class _MapPageState extends State<MapPage> {
         return const Center(child: CircularProgressIndicator());
       },
     );
+  }
+
+  Future<void> obtenerMarkers(List<MedicalCenterEntity> medicalCenters) async {
+    final markers=medicalCenters.map((medicalCenter) {
+      return CustomMakerMedicalCenter(medicalCenter).getMaker(context);
+    });
+    markersList = await Future.wait<Marker>(markers);
+
   }
 }
 
