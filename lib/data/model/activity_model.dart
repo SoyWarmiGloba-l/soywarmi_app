@@ -4,7 +4,7 @@ import 'package:equatable/equatable.dart';
 
 class ActivityModel extends Equatable {
   final int id;
-  final String eventTypeId;
+  final int eventTypeId;
   final String name;
   final String description;
   final String endDate;
@@ -42,7 +42,7 @@ class ActivityModel extends Equatable {
 
     return ActivityModel(
       id: json['id'] as int,
-      eventTypeId: json['event_type_id'] as String,
+      eventTypeId: json['event_type_id'] as int,
       name: json['name'] as String,
       description: json['description'] as String,
       endDate: json['end_date'] as String,
