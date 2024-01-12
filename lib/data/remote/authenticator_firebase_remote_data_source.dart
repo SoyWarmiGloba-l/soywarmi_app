@@ -35,8 +35,10 @@ class EmailAuthenticatorFirebaseRemoteDataSourceImplementation
     );
 
     final userToken = await result.user!.getIdToken();
+    final uuid = result.user!.uid;
 
     await storage.write(key: 'USER_TOKEN', value: userToken);
+    await storage.write(key: "UUID", value: uuid);
 
     if (result.user == null) {
       throw Exception('Error: User not found');
@@ -73,7 +75,11 @@ class GoogleAuthenticatorFirebaseRemoteDataSourceImplementation
       final result = await _firebaseAuth.signInWithCredential(credential);
 
       final userToken = await result.user!.getIdToken();
+      final uuid = result.user!.uid;
+
       await storage.write(key: "USER_TOKEN", value: userToken);
+      await storage.write(key: "UUID", value: uuid);
+
     } catch (e) {
       if (e is PlatformException && e.code == 'sign_in_canceled') {
         throw Exception('Error: Google sign-in was cancelled by the user');

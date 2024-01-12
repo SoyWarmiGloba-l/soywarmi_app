@@ -59,6 +59,7 @@ dependencies:
   image_picker: ^1.0.5
   flutter_email_sender: ^6.0.2
   faker: ^2.1.0
+  pusher_client_fixed: ^0.0.1
 
 dev_dependencies:
   flutter_test:

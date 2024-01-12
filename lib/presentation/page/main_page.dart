@@ -11,16 +11,19 @@ import 'package:soywarmi_app/presentation/widget/custom_bottom_navigator_bar.dar
 import 'package:soywarmi_app/utilities/nb_colors.dart';
 
 class MainPage extends StatefulWidget {
-  const MainPage({super.key});
+  final int selectedIndex;
+
+  const MainPage({Key? key, this.selectedIndex = 0}) : super(key: key);
 
   @override
-  State<MainPage> createState() => _MainPageState();
+  State<MainPage> createState() => _MainPageState(selectedIndex);
 }
 
 class _MainPageState extends State<MainPage> {
   late FlutterLocalization _flutterLocalization;
   late String _selectedLanguage;
   int _selectedIndex = 0;
+  _MainPageState(this._selectedIndex);
 
   @override
   void initState() {
@@ -40,38 +43,39 @@ class _MainPageState extends State<MainPage> {
       'Chats',
     ];
     return Scaffold(
-        appBar: CustomAppBar(
-          title: _titles[_selectedIndex],
-        ),
-        body: IndexedStack(
-          index: _selectedIndex,
-          children: const [
-            HomePage(),
-            MapPage(),
-            SpecialistsPage(),
-            PostsPage(),
-            ChatsPage(),
-          ],
-        ),
-        floatingActionButton: _selectedIndex == 3
-            ? FloatingActionButton(
-                backgroundColor: NBSecondPrimaryColor,
-                onPressed: () {
-                  Navigator.pushNamed(context, '/new_post');
-                },
-                child: const Icon(
-                  Icons.add,
-                  color: NBColorWhite,
-                ),
-              )
-            : null,
-        bottomNavigationBar: CustomBottomNavigationBar(
-          selectedIndex: _selectedIndex,
-          onTabChange: (index) {
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
-        ));
+      appBar: CustomAppBar(
+        title: _titles[_selectedIndex],
+      ),
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: const [
+          HomePage(),
+          MapPage(),
+          SpecialistsPage(),
+          PostPage(),
+          ChatsPage(),
+        ],
+      ),
+      floatingActionButton: _selectedIndex == 3
+          ? FloatingActionButton(
+              backgroundColor: NBSecondPrimaryColor,
+              onPressed: () {
+                Navigator.pushNamed(context, '/new_post');
+              },
+              child: const Icon(
+                Icons.add,
+                color: NBColorWhite,
+              ),
+            )
+          : null,
+      bottomNavigationBar: CustomBottomNavigationBar(
+        selectedIndex: _selectedIndex,
+        onTabChange: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+      ),
+    );
   }
 }

@@ -22,7 +22,16 @@ class TeamFailure extends Failure {
   @override
   List<Object> get props => [message];
 }
+class CreateChatConversationFailure extends Failure {
+  CreateChatConversationFailure([String? message])
+      : message =
+      message ?? 'Ha ocurrido un error inesperado, inténtelo de nuevo.';
+  final String message;
 
+  @override
+  List<Object> get props => [message];
+
+}
 class ActivityFailure extends Failure {
   ActivityFailure(this.message);
   final String message;
@@ -30,7 +39,13 @@ class ActivityFailure extends Failure {
   @override
   List<Object> get props => [message];
 }
+class UserFailure extends Failure {
+  UserFailure(this.message);
+  final String message;
 
+  @override
+  List<Object> get props => [message];
+}
 class FaqsFailure extends Failure {
   FaqsFailure(this.message);
   final String message;
@@ -53,6 +68,9 @@ class NewsFailure extends Failure {
   @override
   List<Object> get props => [message];
 }
+class ChatConversationsFailure extends Failure {
+  ChatConversationsFailure(this.message);
+  final String message;
 
 class PublicationsFailure extends Failure {
   PublicationsFailure(this.message);
@@ -62,6 +80,9 @@ class PublicationsFailure extends Failure {
   List<Object> get props => [message];
 }
 
+  @override
+  List<Object> get props => [message];
+}
 class AuthenticationFailure extends Failure {
   AuthenticationFailure([String? message])
       : message =

@@ -917,6 +917,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.4"
+  pusher_client_fixed:
+    dependency: "direct main"
+    description:
+      name: pusher_client_fixed
+      sha256: "944fd8d5f4126ceaf777214826b87308753858cedc3c1e364585b7b6127b534a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.2+2"
+  quiver:
+    dependency: transitive
+    description:
+      name: quiver
+      sha256: b1c1ac5ce6688d77f65f3375a9abb9319b3cb32486bdc7a1e0fdf004d7ba4e47
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.2.1"
   sanitize_html:
     dependency: transitive
     description:

@@ -9,6 +9,7 @@ import 'package:soywarmi_app/presentation/bloc/authentication_bloc/authenticatio
 import 'package:soywarmi_app/presentation/page/about_us_page.dart';
 import 'package:soywarmi_app/presentation/page/activities_page.dart';
 import 'package:soywarmi_app/presentation/page/complaint_page.dart';
+import 'package:soywarmi_app/presentation/page/chats_page.dart';
 import 'package:soywarmi_app/presentation/page/edit_profile_page.dart';
 import 'package:soywarmi_app/presentation/page/frequent_asked_questions_page.dart';
 import 'package:soywarmi_app/presentation/page/main_page.dart';
@@ -52,7 +53,6 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     configureLocalization();
     super.initState();
-    
   }
 
   void configureLocalization() {
@@ -61,9 +61,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void onTranslatedLanguage(Locale? locale) {
-    setState(() {
-      
-    });
+    setState(() {});
   }
 
   @override
@@ -108,8 +106,7 @@ class _MyAppState extends State<MyApp> {
           '/members': (context) => const MembersPage(),
           '/news': (context) => const NewsPage(),
           '/activity': (context) => const ActivitiesPage(),
-          '/complaint':(context) => const ComplaintPage(),
-
+          '/complaint': (context) => const ComplaintPage(),
         },
       ),
     );
