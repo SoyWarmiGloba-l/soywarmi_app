@@ -44,7 +44,7 @@ class _MapPageState extends State<MapPage> {
     _checkLocationPermission();
   }
 
-  void _showCityModal(BuildContext context) {
+  /*void _showCityModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -94,7 +94,7 @@ class _MapPageState extends State<MapPage> {
       },
     );
   }
-
+*/
   List<Widget> generateCountryButtons() {
     List<Widget> buttons = [];
     final List<Map<String, dynamic>> ciudades = [
@@ -291,7 +291,7 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
-  /*void _showCityModal(
+  void _showCityModal(
     BuildContext context,
   ) {
     showModalBottomSheet(
@@ -356,86 +356,89 @@ class _MapPageState extends State<MapPage> {
         );
       },
     );
-  }*/
+  }
   List<Marker> markersList=[];
+  bool markersUploaded=false;
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
     return BlocBuilder<GetMedicalCentersCubit, GetMedicalCentersState>(
+
       bloc: sl<GetMedicalCentersCubit>()..getMedicalCenters(),
       builder: (context, state) {
         if (state is GetMedicalCentersLoaded) {
-          obtenerMarkers(state.medicalCenters);
-
-          return Stack(
-            children: [
-              GoogleMap(
-                onMapCreated: _onMapCreated,
-                markers: markersList.toSet(),
-                initialCameraPosition: CameraPosition(
-                  target: camaraPosition,
-                  zoom: 15.0,
+          if(markersUploaded){
+            return Stack(
+              children: [
+                GoogleMap(
+                  onMapCreated: _onMapCreated,
+                  markers: markersList.toSet(),
+                  initialCameraPosition: CameraPosition(
+                    target: camaraPosition,
+                    zoom: 15.0,
+                  ),
                 ),
-              ),
-              Positioned(
-                left: 0,
-                right: width * 0.6,
-                bottom: 60,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 10),
-                  child: ElevatedButton(
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(
-                          NBSecondPrimaryColor),
-                      shape: MaterialStateProperty.all<OutlinedBorder>(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
+                Positioned(
+                  left: 0,
+                  right: width * 0.6,
+                  bottom: 60,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 10),
+                    child: ElevatedButton(
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all<Color>(
+                            NBSecondPrimaryColor),
+                        shape: MaterialStateProperty.all<OutlinedBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
                         ),
                       ),
-                    ),
-                    onPressed: () async {
-                      _showCityModal(context);
-                      final res = FaqsRemoteDataSourceImplementation();
-                      final data = res.getFaqs();
-                    },
-                    child: const Text(
-                      'Cambiar ciudad',
-                      style: TextStyle(fontSize: 10),
+                      onPressed: () async {
+                        _showCityModal(context);
+                        final res = FaqsRemoteDataSourceImplementation();
+                        final data = res.getFaqs();
+                      },
+                      child: const Text(
+                        'Cambiar ciudad',
+                        style: TextStyle(fontSize: 10),
+                      ),
                     ),
                   ),
                 ),
-              ),
-              Positioned(
-                left: 0,
-                right: width * 0.6,
-                bottom: 10,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 10),
-                  child: ElevatedButton(
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(
-                          NBSecondPrimaryColor),
-                      shape: MaterialStateProperty.all<OutlinedBorder>(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
+                Positioned(
+                  left: 0,
+                  right: width * 0.6,
+                  bottom: 10,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 10),
+                    child: ElevatedButton(
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all<Color>(
+                            NBSecondPrimaryColor),
+                        shape: MaterialStateProperty.all<OutlinedBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
                         ),
                       ),
-                    ),
-                    onPressed: () async {
-                      _showModalNearestHospitalsl(context, state.medicalCenters);
-                    },
-                    child: const Text(
-                      'Mostrar mas cercanos',
-                      style: TextStyle(fontSize: 10),
+                      onPressed: () async {
+                        _showModalNearestHospitalsl(context, state.medicalCenters);
+                      },
+                      child: const Text(
+                        'Mostrar mas cercanos',
+                        style: TextStyle(fontSize: 10),
+                      ),
                     ),
                   ),
-                ),
-              )
-            ],
-          );
+                )
+              ],
+            );
+          }else{
+            obtenerMarkers(state.medicalCenters);
+          }
         }
-
         if (state is GetMedicalCentersError) {
           return Center(
             child: Column(
@@ -463,8 +466,18 @@ class _MapPageState extends State<MapPage> {
     final markers=medicalCenters.map((medicalCenter) {
       return CustomMakerMedicalCenter(medicalCenter).getMaker(context);
     });
-    markersList = await Future.wait<Marker>(markers);
 
+    Future.wait<Marker>(markers).then((List<Marker> resolvedMarkers) {
+      markersUploaded=true;
+      setState(() {
+        markersList = resolvedMarkers;
+      });
+    }).catchError((error) {
+      print('Error al cargar los marcadores: $error');
+    });
+  }
+  Future<void> obtenerFutureMakers(Iterable<Future<Marker>> markers) async {
+    markersList= await Future.wait<Marker>(markers);
   }
 }
 
