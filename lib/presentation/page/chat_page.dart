@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:soywarmi_app/presentation/page/chats_page.dart';
+import 'package:soywarmi_app/presentation/page/main_page.dart';
 import 'package:soywarmi_app/utilities/nb_colors.dart';
 import 'package:soywarmi_app/utilities/nb_images.dart';
 import 'package:pusher_client_fixed/pusher_client_fixed.dart';
@@ -33,6 +35,7 @@ class _ChatPageState extends State<ChatPage> {
     //GET http://127.0.0.1:8000/api/get_messages/5
     obtainMessagesConversation();
     connect();
+    checkMessagesRead();
     /*if (!isPusherConnected) {
       connect();
       isPusherConnected = true;
@@ -41,9 +44,23 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void dispose() {
     // channel.unbind(eventName); // Replace with your event name
-    pusher.unsubscribe("mensajes-publicos"); // Replace with your channel name
-    pusher.disconnect();
+    pusher.unsubscribe("mensajes."+id); // Replace with your channel name
+    //pusher.disconnect();
     super.dispose();
+  }
+  checkMessagesRead() async{
+    final _storage = const FlutterSecureStorage();
+    final userToken = await _storage.read(key: 'USER_TOKEN');
+    var response = await http.put(
+        Uri.parse(dotenv.env["API_ENDPOINT"]!+"/api/v1/check_read_message/"+id),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          "Authorization": 'Bearer $userToken'
+        });
+    print("PUT CHECK MESSAGE"+response.statusCode.toString());
+    if (response.statusCode == 200) {
+      obtainMessagesConversation();
+    }
   }
   postMessage() async {
     final _storage = const FlutterSecureStorage();
@@ -62,9 +79,11 @@ class _ChatPageState extends State<ChatPage> {
 
     }
   }
+  String uuid="";
   obtainMessagesConversation() async {
-    final _storage = const FlutterSecureStorage();
-    final userToken = await _storage.read(key: 'USER_TOKEN');
+    const storage = FlutterSecureStorage();
+    final userToken = await storage.read(key: 'USER_TOKEN');
+    uuid = (await storage.read(key: 'UUID')).toString();
     print(userToken);
     var response = await http.get(
         Uri.parse(dotenv.env["API_ENDPOINT"]!+ "/api/v1/get_messages/"+id),
@@ -91,7 +110,7 @@ class _ChatPageState extends State<ChatPage> {
       'app-key', //default is 'app-key', change to production!
       PusherOptions(
 
-        host: '804f-2800-cd0-1605-3500-bacf-d19-b338-ac8b.ngrok-free.app', //you soketi server ip
+        host: '88d2-2800-cd0-1604-f000-dddb-9198-18af-76e1.ngrok-free.app',
         wssPort: 443,
         wsPort: 80, // port is 6001 by default
         encrypted: true, // true for use SSL
@@ -109,18 +128,26 @@ class _ChatPageState extends State<ChatPage> {
     String uuid = 'c1fa8fb1-8598-4824-aeb5-fcc05c54ca11';
     pusher.connect();
     Channel channel3 = pusher.subscribe("mensajes."+id);
+    channel3.bind("registro-mensaje", (PusherEvent? event) {
+      print(event?.data);
+      checkMessagesRead();
+      obtainMessagesConversation();
+      //obtainMessagesConversation();
+      print("Suscripción a 'mensajes de "+id);
+    });
     pusher.onConnectionStateChange((state) {
       print(
           "previousState: ${state?.previousState}, currentState: ${state?.currentState}");
       if (state?.currentState == 'CONNECTED') {
         print("CONNECTING TO PUSHER EVENT");
 
-        channel3.bind("registro-mensaje", (PusherEvent? event) {
+        /*channel3.bind("registro-mensaje", (PusherEvent? event) {
           print(event?.data);
+          checkMessagesRead();
           obtainMessagesConversation();
           //obtainMessagesConversation();
           print("Suscripción a 'mensajes de "+id);
-        });
+        });*/
         /*channel3.bind("pusher:subscription_succeeded", (PusherEvent? event) {
           obtainMessagesConversation();
           print("Suscripción a 'mensajes-publicos' exitosa");
@@ -160,10 +187,19 @@ class _ChatPageState extends State<ChatPage> {
             Padding(
                 padding: const EdgeInsets.only(right: 8, left: 8),
                 child: Text(
-                  this.name,
+                  name.length > 20
+                      ? "${name.substring(0, 20)}..."
+                      : name,
                   style: TextStyle(color: Theme.of(context).primaryColor),
                 )),
           ]),
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+            Navigator.push(context, MaterialPageRoute(builder: (context) => const MainPage(selectedIndex: 4)));
+          },
         ),
       ),
       body: Column(children: [
@@ -178,14 +214,20 @@ class _ChatPageState extends State<ChatPage> {
                 reverse: true,
                 itemCount: mensajes.length,
                 itemBuilder: (context, index) {
+                  print("MOSTRAR MENSAJES-------------------------------------------------------------------------------");
+                  print(uuid);
+                  print(mensajes[index]["id"]);
+
                   return Container(
                     margin: const EdgeInsets.only(top: 10),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Padding(
+                        Container(
                           padding: const EdgeInsets.only(bottom: 5),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
+                            mainAxisAlignment: (uuid.toString()==mensajes[index]["id"].toString())?MainAxisAlignment.end:MainAxisAlignment.start,
                             children: [
                               const SizedBox(
                                 width: 40,
@@ -199,7 +241,7 @@ class _ChatPageState extends State<ChatPage> {
                           ),
                         ),
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
+                          mainAxisAlignment: (uuid.toString()==mensajes[index]["id"].toString())?MainAxisAlignment.end:MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             const CircleAvatar(
@@ -215,7 +257,7 @@ class _ChatPageState extends State<ChatPage> {
                                   maxWidth:
                                       MediaQuery.of(context).size.width * 0.6),
                               decoration: BoxDecoration(
-                                  color: Colors.grey[200],
+                                  color:  (uuid.toString()!=mensajes[index]["id"].toString())?Colors.grey[200]:Colors.greenAccent,
                                   borderRadius: const BorderRadius.only(
                                     topLeft: Radius.circular(16),
                                     topRight: Radius.circular(16),
@@ -233,7 +275,7 @@ class _ChatPageState extends State<ChatPage> {
                         Padding(
                           padding: const EdgeInsets.only(top: 5),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
+                            mainAxisAlignment: (uuid.toString()==mensajes[index]["id"].toString())?MainAxisAlignment.end:MainAxisAlignment.start,
                             children: [
                               const SizedBox(
                                 width: 40,

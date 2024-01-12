@@ -1,4 +1,3 @@
-
 import 'package:dartz/dartz.dart';
 import 'package:soywarmi_app/domain/repository/user_repository.dart';
 
@@ -18,13 +17,12 @@ class UsersRepositoryImplementation extends UserRepository {
     try {
       final userModel = await userRemoteDataSource.getUsers();
 
-      final listUsers = userModel.map((e) => UserEntity(
-          id: e.id,
-          email: e.email)).toList();
+      final listUsers =
+          userModel.map((e) => UserEntity(id: e.id, email: e.email)).toList();
 
       return Right(listUsers);
     } on Exception {
-      return Left(UserFailure('Error al obtener los equipos'));
+      return Left(UserFailure('Error al obtener los usuarios'));
     }
   }
 }

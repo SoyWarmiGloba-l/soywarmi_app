@@ -52,7 +52,7 @@ class ChatConversationsDataSourceImplementation extends ChatConversationsDataSou
 
     if (req.statusCode == 200) {
       final newsResponse = jsonDecode(req.body);
-      final String id = newsResponse['data'];
+      final String id = newsResponse['data'].toString();
       return id;
     } else {
       throw Exception('Error al obtener los datos');

@@ -9,10 +9,12 @@ import 'package:soywarmi_app/presentation/widget/custom_bottom_navigator_bar.dar
 import 'package:soywarmi_app/utilities/nb_colors.dart';
 
 class MainPage extends StatefulWidget {
-  const MainPage({super.key});
+  final int selectedIndex;
+
+  const MainPage({Key? key, this.selectedIndex = 0}) : super(key: key);
 
   @override
-  State<MainPage> createState() => _MainPageState();
+  State<MainPage> createState() => _MainPageState(selectedIndex);
 }
 
 List<String> _titles = [
@@ -24,42 +26,50 @@ List<String> _titles = [
 ];
 
 class _MainPageState extends State<MainPage> {
-  int _selectedIndex = 0;
+  int _selectedIndex;
+  _MainPageState(this._selectedIndex);
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: CustomAppBar(
-          title: _titles[_selectedIndex],
+      appBar: CustomAppBar(
+        title: _titles[_selectedIndex],
+      ),
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: const [
+          HomePage(),
+          MapPage(),
+          SpecialistsPage(),
+          PostPage(),
+          ChatsPage(),
+        ],
+      ),
+      floatingActionButton: _selectedIndex == 3
+          ? FloatingActionButton(
+        backgroundColor: NBSecondPrimaryColor,
+        onPressed: () {
+          Navigator.pushNamed(context, '/new_post');
+        },
+        child: const Icon(
+          Icons.add,
+          color: NBColorWhite,
         ),
-        body: IndexedStack(
-          index: _selectedIndex,
-          children: const [
-            HomePage(),
-            MapPage(),
-            SpecialistsPage(),
-            PostPage(),
-            ChatsPage(),
-          ],
-        ),
-        floatingActionButton: _selectedIndex == 3
-            ? FloatingActionButton(
-                backgroundColor: NBSecondPrimaryColor,
-                onPressed: () {
-                  Navigator.pushNamed(context, '/new_post');
-                },
-                child: const Icon(
-                  Icons.add,
-                  color: NBColorWhite,
-                ),
-              )
-            : null,
-        bottomNavigationBar: CustomBottomNavigationBar(
-          selectedIndex: _selectedIndex,
-          onTabChange: (index) {
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
-        ));
+      )
+          : null,
+      bottomNavigationBar: CustomBottomNavigationBar(
+        selectedIndex: _selectedIndex,
+        onTabChange: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+      ),
+    );
   }
 }

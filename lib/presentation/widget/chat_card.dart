@@ -16,7 +16,7 @@ class ChatCard extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => ChatPage(this.chatConversation.id_chat_conversations.toString(),this.chatConversation.name.toString())),
+          MaterialPageRoute(builder: (context) => ChatPage(chatConversation.id_chat_conversations.toString(),chatConversation.name.toString())),
         );
       },
       child: Container(
@@ -39,13 +39,17 @@ class ChatCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                chatConversation.name,
-                style: TextStyle(
+                chatConversation.name.length > 25
+                    ? "${chatConversation.name.substring(0, 25)}..."
+                    : chatConversation.name,
+                style: const TextStyle(
                   fontSize: 18,
                 ),
               ),
               Text(
-                (chatConversation.last_message==null)?"":chatConversation.last_message.toString(),
+                (chatConversation.last_message==null)?"":chatConversation.last_message.length > 25
+                  ? "${chatConversation.last_message.substring(0, 25)}..."
+                      : chatConversation.last_message,
                 style: TextStyle(
                   fontSize: 14,
                   color: Theme.of(context).primaryColor.withOpacity(0.5),

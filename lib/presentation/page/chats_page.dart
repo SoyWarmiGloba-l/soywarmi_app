@@ -26,21 +26,22 @@ class _ChatsPageState extends State<ChatsPage> {
     super.initState();
     connect();
   }
-  void dispose() {
+  Future<void> dispose() async {
     // channel.unbind(eventName); // Replace with your event name
+    uuid = (await _storage.read(key: 'UUID')).toString();
     pusher.unsubscribe("chat."+uuid!); // Replace with your channel name
-    pusher.disconnect();
+    //pusher.disconnect();
     super.dispose();
   }
   late PusherClient pusher;
 
   connect() async {
-    print("CONNECT CHAT PAGE NEW");
+    print("CONNECT CHATS PAGE ---------------------------------------------------");
     pusher = PusherClient(
       'app-key', //default is 'app-key', change to production!
       const PusherOptions(
 
-        host: '804f-2800-cd0-1605-3500-bacf-d19-b338-ac8b.ngrok-free.app', //you soketi server ip
+        host: '88d2-2800-cd0-1604-f000-dddb-9198-18af-76e1.ngrok-free.app', //you soketi server ip
         wssPort: 443,
         wsPort: 80, // port is 6001 by default
         encrypted: true, // true for use SSL
@@ -55,20 +56,25 @@ class _ChatsPageState extends State<ChatsPage> {
       autoConnect: false,
       enableLogging: true,
     );
-    uuid = (await _storage.read(key: 'UUID'))!;
+    uuid = (await _storage.read(key: 'UUID')).toString();
     pusher.connect();
     Channel channel3 = pusher.subscribe("chat."+uuid!);
+    channel3.bind("nuevos-mensajes-chat", (PusherEvent? event) {
+      print("-------------------------------------------------------------------------------------------------------------");
+      print(event?.data);
+      sl<GetChatConversationsCubit>().getChatConversations();
+    });
     pusher.onConnectionStateChange((state) {
       print(
           "previousState: ${state?.previousState}, currentState: ${state?.currentState}");
       if (state?.currentState == 'CONNECTED') {
         print("CONNECTING TO PUSHER EVENT");
 
-        channel3.bind("nuevos-mensajes-chat", (PusherEvent? event) {
+        /*channel3.bind("nuevos-mensajes-chat", (PusherEvent? event) {
           print("-------------------------------------------------------------------------------------------------------------");
           print(event?.data);
           sl<GetChatConversationsCubit>().getChatConversations();
-        });
+        });*/
         /*channel3.bind("pusher:subscription_succeeded", (PusherEvent? event) {
           obtainMessagesConversation();
           print("Suscripción a 'mensajes-publicos' exitosa");
@@ -90,13 +96,14 @@ class _ChatsPageState extends State<ChatsPage> {
 
 
   }
-
+  List<ChatConversationsEntity> aux=[];
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<GetChatConversationsCubit, GetChatConversationsState>(
       bloc: sl<GetChatConversationsCubit>()..getChatConversations(),
       builder: (context, state){
         if (state is GetChatConversationsLoaded) {
+          aux=state.chat_conversations;
           return ChatConversationsList(chatsList: state.chat_conversations);
         }
 
@@ -123,9 +130,7 @@ class _ChatsPageState extends State<ChatsPage> {
 
         }
 
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
+        return ChatConversationsList(chatsList: aux);
       }
     );
   }

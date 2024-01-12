@@ -6,6 +6,7 @@ import 'package:soywarmi_app/firebase_options.dart';
 import 'package:soywarmi_app/presentation/bloc/authentication_bloc/authentication_bloc.dart';
 import 'package:soywarmi_app/presentation/page/about_us_page.dart';
 import 'package:soywarmi_app/presentation/page/activities_page.dart';
+import 'package:soywarmi_app/presentation/page/chats_page.dart';
 import 'package:soywarmi_app/presentation/page/edit_profile_page.dart';
 import 'package:soywarmi_app/presentation/page/frequent_asked_questions_page.dart';
 import 'package:soywarmi_app/presentation/page/main_page.dart';

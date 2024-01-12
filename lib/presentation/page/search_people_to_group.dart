@@ -44,7 +44,7 @@ class _SearchPeopleToGroupState extends State<SearchPeopleToGroup> {
       _filterPeople();
     });
   }
-  List users=[];
+  List<UserEntity>? usersAux=[];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,7 +56,7 @@ class _SearchPeopleToGroupState extends State<SearchPeopleToGroup> {
           width: MediaQuery.of(context).size.width > 600
               ? 600
               : MediaQuery.of(context).size.width,
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           child: Column(
             children: [
               TextField(
@@ -70,6 +70,7 @@ class _SearchPeopleToGroupState extends State<SearchPeopleToGroup> {
                   bloc:sl<GetUsersCubit>()..getUsers() ,
                   builder: (context,state){
                     if(state is GetUsersLoaded){
+                      usersAux=sl<GetUsersCubit>().state.users;
                       return ListView.builder(
                             itemCount: filteredPeople.length,
                             itemBuilder: (context, index) {
@@ -104,9 +105,8 @@ class _SearchPeopleToGroupState extends State<SearchPeopleToGroup> {
                       ),
                     );
                   }
-                  print("STATE----------------------------------------------------------------------------------------");
-                  print(state);
                   if (state is CreateChatConversationsSuccess) {
+                    Navigator.pop(context);
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => ChatPage(state.id,groupNameController.text)),
@@ -132,7 +132,7 @@ class _SearchPeopleToGroupState extends State<SearchPeopleToGroup> {
 
   void _filterPeople() {
     setState(() {
-      List<UserEntity>? users = sl<GetUsersCubit>().state.users;
+      List<UserEntity>? users = usersAux;
       if(users!=null){
         users= users.where((person) =>
             person.email.toLowerCase().contains(searchController.text.toLowerCase()))
@@ -179,16 +179,16 @@ class _SearchPeopleToGroupState extends State<SearchPeopleToGroup> {
   }
 
   void _createGroup() {
-    List<String> id_users =[];
+    List<String> idUsers =[];
     String groupName = groupNameController.text;
     for (var person in filteredPeople) {
       if(person["isSelected"]){
-        id_users.add(person["id"].toString());
+        idUsers.add(person["id"].toString());
       }
     }
     sl<CreateChatConversationCubit>().createChatConversation(
       name: groupName,
-      users: id_users
+      users: idUsers
     );
 
   }
