@@ -5,7 +5,7 @@ import 'package:equatable/equatable.dart';
 
 class NewsModel extends Equatable {
   final int id;
-  final String eventTypeId;
+  final int eventTypeId;
   final String title;
   final String description;
   final String startDate;
@@ -37,7 +37,7 @@ class NewsModel extends Equatable {
     
   return NewsModel(
     id: json['id'] as int,
-    eventTypeId: json['event_type_id'] as String,
+    eventTypeId: json['event_type_id'] as int,
     title: json['title'] as String,
     description: json['description'] as String,
     image: json['image'] ?? '',

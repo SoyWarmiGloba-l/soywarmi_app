@@ -52,7 +52,7 @@ class _MainPageState extends State<MainPage> {
           HomePage(),
           MapPage(),
           SpecialistsPage(),
-          PostPage(),
+          PostsPage(),
           ChatsPage(),
         ],
       ),

@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 class NewsEntity extends Equatable {
   final int id;
-  final String eventTypeId;
+  final int eventTypeId;
   final String title;
   final String description;
   final String startDate;

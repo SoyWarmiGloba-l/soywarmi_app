@@ -71,14 +71,14 @@ class NewsFailure extends Failure {
 class ChatConversationsFailure extends Failure {
   ChatConversationsFailure(this.message);
   final String message;
+  @override
+  List<Object> get props => [message];
+}
 
 class PublicationsFailure extends Failure {
   PublicationsFailure(this.message);
   final String message;
 
-  @override
-  List<Object> get props => [message];
-}
 
   @override
   List<Object> get props => [message];
