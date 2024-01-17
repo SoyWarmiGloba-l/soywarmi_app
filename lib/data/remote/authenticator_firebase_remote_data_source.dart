@@ -62,8 +62,8 @@ class EmailAuthenticatorFirebaseRemoteDataSourceImplementation
     if(userCredential.user?.uid != null){
       UserPublicGeneralRemoteDataSourceImplementation upgrds=new UserPublicGeneralRemoteDataSourceImplementation();
         Map<String, dynamic> jsonData = {
-          "id":userCredential.user?.uid,
-          "name": '${nombre} ${apellido}',
+          "name": nombre,
+          "lastname": apellido,
           "email": email,
           "password": password,
         };
