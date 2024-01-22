@@ -25,23 +25,34 @@ class _PostPageState extends State<PostPage> {
           Expanded(
             child: SingleChildScrollView(
               child: Column(children: [
-                const Row(children: [
-                  Padding(
+                 Row(children: [
+                  const Padding(
                     padding: EdgeInsets.all(8.0),
                     child: CircleAvatar(
                       radius: 25,
                       backgroundImage: AssetImage(NbImageEmpty),
                     ),
                   ),
-                  SizedBox(width: 12),
+                  const SizedBox(width: 12),
                   Text(
-                    'Anonimo',
-                    style: TextStyle(
+                    widget.publication.user.email,
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ]),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    widget.publication.title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color:
+                      Theme.of(context).primaryColorDark,
+                    ),
+                  ),
+                ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
@@ -108,7 +119,7 @@ class _PostPageState extends State<PostPage> {
                   padding: const EdgeInsets.all(8.0),
                   child: Row(
                     children: [
-                      Row(
+                      /*Row(
                         children: [
                           Icon(
                             Icons.favorite_border,
@@ -126,7 +137,7 @@ class _PostPageState extends State<PostPage> {
                             ),
                           ),
                         ],
-                      ),
+                      ),*/
                       const SizedBox(width: 16),
                       Row(
                         children: [
