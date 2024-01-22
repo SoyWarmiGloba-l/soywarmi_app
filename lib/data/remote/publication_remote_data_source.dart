@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:soywarmi_app/data/model/publication_model.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:math';
 import 'package:faker/faker.dart';
+
+import 'http_headers_global.dart';
 
 abstract class PublicationRemoteDataSource {
   Future<List<PublicationModel>> getPublications();
@@ -17,22 +21,6 @@ class PublicationRemoteDaraSourceImplementation
   final _storage = const FlutterSecureStorage();
   final _endPoint = dotenv.env['API_ENDPOINT'];
 
-  final List<PublicationModel> listPublications = List.generate(5, (index) {
-    final faker = Faker();
-    final random = Random();
-
-    return PublicationModel(
-      id: index + 1,
-      userId: random.nextInt(100), // IDs de usuarios aleatorios
-      title: faker.lorem.sentence(),
-      description: faker.lorem.sentences(2).join(' '),
-      type: true,
-      images: List.generate(
-          3,
-          (_) =>
-              'https://picsum.photos/200/300'), // Imágenes aleatorias de Lorem Picsum
-    );
-  });
   @override
   Future<void> createPublication(PublicationModel publication) {
     // TODO: implement createPublication
@@ -47,22 +35,39 @@ class PublicationRemoteDaraSourceImplementation
 
   @override
   Future<PublicationModel> getPublication(int id) async {
-    return Future.delayed(
-      const Duration(seconds: 2),
-      () {
-        return listPublications.firstWhere((element) => element.id == id);
-      },
-    );
+    final userToken = await _storage.read(key: 'USER_TOKEN');
+    final req = await HttpHeadersGlobal.headerGetHttpWithToken(
+        userToken, '$_endPoint/api/v1/publications/$id');
+
+    if (req.statusCode == 200) {
+      final publicationsResponse = jsonDecode(req.body);
+      final publication = publicationsResponse['data'];
+      return PublicationModel.fromJson(publication);
+    } else {
+      throw Exception('Error al obtener los datos');
+    }
   }
 
   @override
   Future<List<PublicationModel>> getPublications() async {
-    return Future.delayed(
-      const Duration(seconds: 2),
-      () {
-        return listPublications;
-      },
-    );
+    final userToken = await _storage.read(key: 'USER_TOKEN');
+    final req = await HttpHeadersGlobal.headerGetHttpWithToken(
+        userToken, '$_endPoint/api/v1/publications');
+
+    if (req.statusCode == 200) {
+      final publicationsResponse = jsonDecode(req.body);
+      final List<dynamic> listPublications = publicationsResponse['data'];
+
+      if (listPublications.isNotEmpty) {
+        final List<PublicationModel> listPublicationsModel =
+        listPublications.map((e) => PublicationModel.fromJson(e)).toList();
+        return listPublicationsModel;
+      } else {
+        return [];
+      }
+    } else {
+      throw Exception('Error al obtener los datos');
+    }
   }
 
   @override
