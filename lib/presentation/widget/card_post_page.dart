@@ -39,7 +39,14 @@ class CardPostPage extends StatelessWidget {
             ),
             const Spacer(),
             TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => PostPage(
+                            publication: publication,
+                          )));
+                },
                 child: Text(
                   LocaleData.ver.getString(context),
                   style: TextStyle(color: Theme.of(context).primaryColor),
