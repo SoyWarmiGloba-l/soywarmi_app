@@ -13,7 +13,7 @@ class DoctorEntity extends PersonEntity {
     required String gender,
     required String email,
     required String photo,
-    required String phone,
+    required int phone,
     required String createdAt,
     required String updatedAt,
     required bool deletedAt,

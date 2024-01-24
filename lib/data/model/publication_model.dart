@@ -5,7 +5,7 @@ class PublicationModel extends Equatable {
   final int userId;
   final String title;
   final String description;
-  final bool type;
+  final bool anonymous;
   final List<String> images;
 
   const PublicationModel({
@@ -13,7 +13,7 @@ class PublicationModel extends Equatable {
     required this.userId,
     required this.title,
     required this.description,
-    required this.type,
+    required this.anonymous,
     required this.images,
   });
 
@@ -23,7 +23,7 @@ class PublicationModel extends Equatable {
       userId: json['user_id'] as int,
       title: json['title'] as String,
       description: json['description'] as String,
-      type: json['type'] as bool,
+      anonymous: json['anonymous'] as bool,
       images: (json['images'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList() ?? [],
@@ -36,7 +36,7 @@ class PublicationModel extends Equatable {
       'user_id': userId,
       'title': title,
       'description': description,
-      'type': type,
+      'anonymous': anonymous,
       'images': images,
     };
   }
@@ -47,7 +47,7 @@ class PublicationModel extends Equatable {
         userId,
         title,
         description,
-        type,
+        anonymous,
         images,
       ];
 }

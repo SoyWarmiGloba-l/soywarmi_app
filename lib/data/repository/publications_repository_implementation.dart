@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:soywarmi_app/core/failures.dart';
 import 'package:soywarmi_app/data/remote/publication_remote_data_source.dart';
 import 'package:soywarmi_app/domain/entity/publications_entity.dart';
+import 'package:soywarmi_app/domain/entity/user_entity.dart';
 import 'package:soywarmi_app/domain/repository/publications_repository.dart';
 
 class PublicationsRepositoryImplementation extends PublicationsRepository {
@@ -41,7 +42,7 @@ class PublicationsRepositoryImplementation extends PublicationsRepository {
               userId: publication.userId,
               title: publication.title,
               description: publication.description,
-              type: publication.type,
+              anonymous: publication.anonymous,
               images: publication.images))
           .toList();
       return right(publicationsEntity);

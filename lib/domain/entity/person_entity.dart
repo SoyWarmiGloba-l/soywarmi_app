@@ -9,7 +9,7 @@ class PersonEntity extends Equatable {
   final String photo;
   final String birthday;
   final String gender;
-  final String phone;
+  final int phone;
   final String createdAt;
   final String updatedAt;
   final bool deletedAt;

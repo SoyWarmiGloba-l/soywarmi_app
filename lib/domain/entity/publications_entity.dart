@@ -5,7 +5,7 @@ class PublicationEntity extends Equatable {
   final int userId;
   final String title;
   final String description;
-  final bool type;
+  final bool anonymous;
   final List<String> images;
 
   const PublicationEntity({
@@ -13,7 +13,7 @@ class PublicationEntity extends Equatable {
     required this.userId,
     required this.title,
     required this.description,
-    required this.type,
+    required this.anonymous,
     required this.images,
   });
 
@@ -23,7 +23,7 @@ class PublicationEntity extends Equatable {
         userId,
         title,
         description,
-        type,
+        anonymous,
         images,
       ];
 }

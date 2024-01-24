@@ -140,7 +140,7 @@ class _MemberInfoPageState extends State<MemberInfoPage> {
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Text(
-                              widget.member.phone,
+                              widget.member.phone.toString(),
                               style: const TextStyle(fontSize: 15),
                             ),
                           ),

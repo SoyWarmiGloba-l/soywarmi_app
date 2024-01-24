@@ -20,11 +20,24 @@ class TeamRemoteDataSourceImplementation extends TeamRemoteDataSource {
         userToken, '$_endPoint/api/v1/teams');
 
     if (req.statusCode == 200) {
-      final Map<String, dynamic> teams = json.decode(req.body);
+      final teams = jsonDecode(req.body);
       final List<dynamic> listTeams = teams['data'];
       if (listTeams.isNotEmpty) {
-        final List<MemberModel> listTeamsModel =
-            listTeams.map((e) => MemberModel.fromJson(e)).toList();
+        List<MemberModel> listTeamsModel =[];
+        for(int i=0;i<listTeams.length;i++){
+          for(int j=0;j<listTeams[i]["person"].length;j++){
+            if (listTeams[i].containsKey("social_networks") && listTeams[i]["social_networks"]!=null) {
+              listTeams[i]["person"][j]['twitter']=listTeams[i]["social_networks"]["twitter"]??"";
+              listTeams[i]["person"][j]['facebook']=listTeams[i]["social_networks"]["facebook"]??"";
+              listTeams[i]["person"][j]['instagram']=listTeams[i]["social_networks"]["instagram"]??"";
+            }else{
+              listTeams[i]["person"][j]['twitter']="";
+              listTeams[i]["person"][j]['facebook']="";
+              listTeams[i]["person"][j]['instagram']="";
+            }
+            listTeamsModel.add(MemberModel.fromJson(listTeams[i]["person"][j]));
+          }
+        }
         return listTeamsModel;
       } else {
         return [];

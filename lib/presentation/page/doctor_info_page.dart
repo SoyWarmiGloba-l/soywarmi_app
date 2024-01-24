@@ -72,7 +72,7 @@ class _DoctorInfoPageState extends State<DoctorInfoPage> {
                       Icons.message,
                     ),
                     onPressed: () {
-                      _makePhoneCall(widget.doctor.phone);
+                      _makePhoneCall(widget.doctor.phone.toString());
                     },
                   ),
                 )
@@ -174,9 +174,9 @@ class _DoctorInfoPageState extends State<DoctorInfoPage> {
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Text(
-                              widget.doctor.phone.isEmpty
+                              widget.doctor.phone.toString().isEmpty
                                   ? 'Sin telefono'
-                                  : widget.doctor.phone,
+                                  : widget.doctor.phone.toString(),
                               style: const TextStyle(fontSize: 15),
                             ),
                           ),

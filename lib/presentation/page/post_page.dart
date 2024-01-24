@@ -35,7 +35,8 @@ class _PostPageState extends State<PostPage> {
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    widget.publication.user.email,
+                    //(widget.publication.anonymous)?"Anonimo":widget.publication.email,
+                    "Anonimo",
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
