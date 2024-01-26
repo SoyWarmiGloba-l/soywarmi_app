@@ -43,6 +43,7 @@ class EmailAuthenticatorFirebaseRemoteDataSourceImplementation
     await storage.write(key: 'USER_TOKEN', value: userToken);
     await storage.write(key: "UUID", value: uuid);
 
+
     if (result.user == null) {
       throw Exception('Error: User not found');
     }

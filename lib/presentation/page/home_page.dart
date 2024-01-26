@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localization/flutter_localization.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:soywarmi_app/core/inyection_container.dart';
 import 'package:soywarmi_app/core/language/locales.dart';
 import 'package:soywarmi_app/presentation/bloc/activity/get_activity_cubit.dart';
@@ -23,6 +26,13 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    obtainMyAccount();
+  }
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -33,7 +43,7 @@ class _HomePageState extends State<HomePage> {
             child: Padding(
               padding: const EdgeInsets.only(left: 20, top: 8),
               child: Text(
-                '${LocaleData.hola.getString(context)}, Maria Gonzales!',
+                '${LocaleData.hola.getString(context)}, ${myAccount["name"]}!',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -367,5 +377,17 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
     );
+  }
+  final storage = const FlutterSecureStorage();
+  Map myAccount={
+    "name":""
+  };
+  Future<void> obtainMyAccount() async {
+    final myAccountJson = await storage.read(key: 'my_account');
+    if (myAccountJson != null) {
+      setState(() {
+        myAccount = json.decode(myAccountJson);
+      });
+    }
   }
 }

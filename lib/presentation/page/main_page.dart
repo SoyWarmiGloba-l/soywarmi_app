@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:soywarmi_app/core/language/locales.dart';
 import 'package:soywarmi_app/presentation/page/chats_page.dart';
 import 'package:soywarmi_app/presentation/page/home_page.dart';
@@ -28,6 +31,7 @@ class _MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
+
     _flutterLocalization = FlutterLocalization.instance;
     _selectedLanguage = _flutterLocalization.currentLocale!.languageCode;
     print(_selectedLanguage);

@@ -1,5 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:soywarmi_app/core/language/locales.dart';
 import 'package:soywarmi_app/domain/entity/publications_entity.dart';
@@ -9,10 +10,10 @@ import 'package:soywarmi_app/utilities/nb_colors.dart';
 import 'package:soywarmi_app/utilities/nb_images.dart';
 
 class CardPostPage extends StatelessWidget {
-  const CardPostPage({super.key, required this.publication});
+  CardPostPage({super.key, required this.publication});
 
   final PublicationEntity publication;
-
+  final _endPoint = dotenv.env['API_ENDPOINT'];
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -22,16 +23,16 @@ class CardPostPage extends StatelessWidget {
         margin: const EdgeInsets.all(0),
         child: Column(children: [
           Row(children: [
-            const Padding(
-              padding: EdgeInsets.all(8.0),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
               child: CircleAvatar(
                 radius: 25,
-                backgroundImage: AssetImage(NbImageEmpty),
+                backgroundImage:AssetImage(publication.ownerPhoto),
               ),
             ),
             const SizedBox(width: 12),
             Text(
-              LocaleData.anonimo.getString(context),
+              publication.ownerName,
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -52,17 +53,31 @@ class CardPostPage extends StatelessWidget {
                   style: TextStyle(color: Theme.of(context).primaryColor),
                 ))
           ]),
+          (publication.title!="")?Container(
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              publication.title,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 24,
+                color: Theme.of(context).primaryColorDark.withOpacity(0.5),
+              ),
+            ),
+          ):const SizedBox(),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
-              publication.description,
+              publication.content,
+              maxLines: 4,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: 16,
                 color: Theme.of(context).primaryColorDark.withOpacity(0.5),
               ),
             ),
           ),
-          CarouselSlider.builder(
+          (publication.images.length>0)?CarouselSlider.builder(
             itemCount: publication.images.length,
             options: CarouselOptions(
               height: 300.0,
@@ -91,7 +106,7 @@ class CardPostPage extends StatelessWidget {
                         borderRadius: BorderRadius.all(Radius.circular(10))),
                     child: ClipRRect(
                         borderRadius: BorderRadius.circular(10),
-                        child: Image.network(image, fit: BoxFit.cover)),
+                        child: Image.network('$_endPoint$image', fit: BoxFit.cover)),
                   ),
                   Positioned(
                     top: 5,
@@ -110,12 +125,12 @@ class CardPostPage extends StatelessWidget {
                 ],
               );
             },
-          ),
+          ):const SizedBox(),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
               children: [
-                Row(
+                /*Row(
                   children: [
                     Icon(
                       Icons.favorite_border,
@@ -131,7 +146,7 @@ class CardPostPage extends StatelessWidget {
                       ),
                     ),
                   ],
-                ),
+                ),*/
                 const SizedBox(width: 16),
                 Row(
                   children: [
@@ -142,7 +157,7 @@ class CardPostPage extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      '19',
+                      publication.numberComments.toString(),
                       style: TextStyle(
                         fontSize: 16,
                         color: Theme.of(context).primaryColor.withOpacity(0.5),
@@ -153,7 +168,7 @@ class CardPostPage extends StatelessWidget {
               ],
             ),
           ),
-          Padding(
+          /*Padding(
             padding: const EdgeInsets.only(right: 10, bottom: 10),
             child: Row(
               children: [
@@ -178,7 +193,7 @@ class CardPostPage extends StatelessWidget {
                 )
               ],
             ),
-          ),
+          ),*/
           Padding(
             padding: const EdgeInsets.only(bottom: 10),
             child: TextButton(
@@ -190,7 +205,7 @@ class CardPostPage extends StatelessWidget {
                               publication: publication,
                             )));
               },
-              child: Text('Ver todo los 19 comentarios',
+              child: Text((publication.numberComments>0)?'Ver todo los ${publication.numberComments} comentarios':'Participa en el foro',
                   style: TextStyle(
                     color: Theme.of(context).primaryColorDark.withOpacity(0.5),
                   )),

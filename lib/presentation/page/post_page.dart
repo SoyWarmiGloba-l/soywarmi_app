@@ -57,7 +57,7 @@ class _PostPageState extends State<PostPage> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
-                    widget.publication.description,
+                    widget.publication.content,
                     style: TextStyle(
                       fontSize: 16,
                       color:

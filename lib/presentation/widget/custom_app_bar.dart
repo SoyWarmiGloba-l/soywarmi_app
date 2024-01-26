@@ -1,11 +1,34 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:soywarmi_app/utilities/nb_colors.dart';
 import 'package:soywarmi_app/utilities/nb_images.dart';
 
-class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+import 'image_container.dart';
+class CustomAppBar extends StatefulWidget implements PreferredSizeWidget{
   final String title;
-  const CustomAppBar({super.key, required this.title});
+  CustomAppBar({super.key, required this.title});
 
+  @override
+  State<CustomAppBar> createState() => _CustomAppBarState(title);
+
+  @override
+  // TODO: implement preferredSize
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+}
+
+class _CustomAppBarState extends State<CustomAppBar> {
+  final String title;
+  _CustomAppBarState(this.title);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    obtainMyAccount();
+  }
   @override
   Widget build(BuildContext context) {
     return AppBar(
@@ -70,19 +93,44 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           onTap: () {
             Navigator.pushNamed(context, '/profile');
           },
-          child: const Padding(
+          child: (!myAccount.containsKey("photo") || myAccount["photo"]==null)? const Padding(
             padding: EdgeInsets.only(right: 8, left: 8),
             child: CircleAvatar(
               radius: 20,
               backgroundColor: Colors.transparent,
               backgroundImage: AssetImage(NbImageEmpty),
             ),
+          ):Container(
+            width: 50,
+            margin: EdgeInsets.symmetric(horizontal: 5),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(100),
+              image: DecorationImage(
+                image: myAccount["photo"] == ''
+                    ? const NetworkImage('https://source.unsplash.com/random/800x600/?news')
+                    : NetworkImage(myAccount["photo"]) as ImageProvider,
+                fit: BoxFit.cover,
+              ),
+            ),
+            child: const Text(""),
           ),
         )
       ],
     );
   }
-
-  @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  final storage = const FlutterSecureStorage();
+  Map<dynamic,dynamic> myAccount={
+    "name":""
+  };
+  Future<void> obtainMyAccount() async {
+    final myAccountJson = await storage.read(key: 'my_account');
+    if (myAccountJson != null) {
+      setState(() {
+        print("OBTAIN MY ACCOUNT-----------------------------------------------------------");
+        myAccount=jsonDecode(myAccountJson);
+        print(myAccount);
+      });
+    }
+  }
+ 
 }

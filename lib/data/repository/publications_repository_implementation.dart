@@ -5,6 +5,8 @@ import 'package:soywarmi_app/domain/entity/publications_entity.dart';
 import 'package:soywarmi_app/domain/entity/user_entity.dart';
 import 'package:soywarmi_app/domain/repository/publications_repository.dart';
 
+import '../../utilities/nb_images.dart';
+
 class PublicationsRepositoryImplementation extends PublicationsRepository {
   PublicationsRepositoryImplementation({
     required this.publicationRemoteDataSource,
@@ -39,10 +41,13 @@ class PublicationsRepositoryImplementation extends PublicationsRepository {
       final publicationsEntity = publications
           .map((publication) => PublicationEntity(
               id: publication.id,
-              userId: publication.userId,
+              personId: publication.personId,
               title: publication.title,
-              description: publication.description,
+              content: publication.content,
               anonymous: publication.anonymous,
+              ownerPhoto: (publication.anonymous==1)?NbImageEmpty:publication.ownerPhoto,
+              ownerName: (publication.anonymous==1)?"Anonimo":publication.ownerName,
+              numberComments: publication.numberComments,
               images: publication.images))
           .toList();
       return right(publicationsEntity);
