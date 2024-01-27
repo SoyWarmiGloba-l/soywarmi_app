@@ -59,6 +59,7 @@ mixin LocaleData {
   static const String publicar = 'Publicar';
   static const String denunciar = 'Denunciar';
   static const String editarPerfil = 'Editar perfil';
+  static const String descripcion = 'Descripcion';
 
 
   static const Map<String, dynamic> es = {

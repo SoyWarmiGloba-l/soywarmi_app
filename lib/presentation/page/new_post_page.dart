@@ -1,12 +1,18 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localization/flutter_localization.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:soywarmi_app/core/language/locales.dart';
 import 'package:soywarmi_app/utilities/nb_colors.dart';
 import 'package:soywarmi_app/utilities/nb_images.dart';
 import 'package:image_picker/image_picker.dart';
+
+import '../../data/remote/http_headers_global.dart';
+import '../widget/custom_alerts.dart';
 
 class NewPostPage extends StatefulWidget {
   const NewPostPage({super.key});
@@ -16,14 +22,46 @@ class NewPostPage extends StatefulWidget {
 }
 
 class _NewPostPageState extends State<NewPostPage> {
-  final TextEditingController _controller = TextEditingController();
+  final TextEditingController _controllerTitle = TextEditingController();
+  final TextEditingController _controllerDescription = TextEditingController();
+  final _storage = const FlutterSecureStorage();
+  final _endPoint = dotenv.env['API_ENDPOINT'];
+
+  registrarPost() async {
+    final userToken = await _storage.read(key: 'USER_TOKEN');
+    await CustomAlerts.showConfirmationDialog(myWidgetKey.currentContext!).then((isConfirmed) async {
+      if(isConfirmed){
+        var body=jsonEncode({
+          'title':_controllerTitle.text,
+          'content':_controllerDescription.text
+        });
+        List<Map<String, String>>imagesRoutes=[];
+        for(int i=0;i<_images.length;i++){
+          if(_images[i]!=null){
+            imagesRoutes.add({
+              "name":"photo${i+1}",
+              "path":_images[i]!.path
+            });
+          }
+        }
+        await HttpHeadersGlobal.headerPostHttpWithTokenMultipart(userToken!, '$_endPoint/api/v1/post_publication',body,imagesRoutes).then((res){
+          if(res.statusCode==200){
+            CustomAlerts.showSuccessDialog(context, "Registro correcto", "Publicacion registrada con exito!!!");
+          }else{
+            CustomAlerts.showSuccessDialog(context, "Registro correcto", "Publicacion registrada con exito!!!");
+          }
+        });
+      }
+    });
+  }
 
   List<File?> _images = [];
-
+  final GlobalKey<_NewPostPageState> myWidgetKey = GlobalKey();
   String? _value = 'Anonimo';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        key: myWidgetKey,
         appBar: AppBar(
           elevation: 0,
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -43,13 +81,19 @@ class _NewPostPageState extends State<NewPostPage> {
                     color: NbSecondSecondaryColor,
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Text(LocaleData.publicar.getString(context),
-                        style: TextStyle(
-                          color: Theme.of(context).primaryColor,
-                          fontSize: 16,
-                        )),
+                  child: GestureDetector(
+                    onTap: (){
+                      registrarPost();
+
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Text(LocaleData.publicar.getString(context),
+                          style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 16,
+                          )),
+                    ),
                   ),
                 ),
               ),
@@ -106,7 +150,7 @@ class _NewPostPageState extends State<NewPostPage> {
               child: Column(
                 children: [
                   TextField(
-                    controller: _controller,
+                    controller: _controllerTitle,
                     decoration: InputDecoration(
                       hintText: LocaleData.cualEsTuPregunta.getString(context),
                       hintStyle: TextStyle(
@@ -116,6 +160,17 @@ class _NewPostPageState extends State<NewPostPage> {
                     ),
                     maxLines: null,
                     maxLength: 100,
+                  ),
+                  TextField(
+                    controller: _controllerDescription,
+                    decoration: InputDecoration(
+                      hintText: LocaleData.descripcion.getString(context),
+                      hintStyle: TextStyle(
+                        color: Theme.of(context).primaryColor.withOpacity(0.5),
+                      ),
+                      border: InputBorder.none,
+                    ),
+                    maxLength: 800,
                   ),
                   Expanded(
                     child: ListView.builder(

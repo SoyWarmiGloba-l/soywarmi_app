@@ -21,4 +21,18 @@ class HttpHeadersGlobal {
         body: body);
     return req;
   }
+
+  static Future<http.StreamedResponse> headerPostHttpWithTokenMultipart(String token,String url,String body,List<Map<String, String>>files) async {
+    var request = http.MultipartRequest('POST', Uri.parse(url));
+    request.headers['Authorization'] = 'Bearer $token';
+    request.fields['data'] = body;
+    for(int i=0;i<files.length;i++){
+      request.files.add(await http.MultipartFile.fromPath(
+        files[i]["name"]!,
+        files[i]["path"]!,
+      ));
+    }
+    var response = await request.send();
+    return response;
+  }
 }
