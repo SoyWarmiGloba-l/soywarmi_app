@@ -1,10 +1,7 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localization/flutter_localization.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:soywarmi_app/core/inyection_container.dart' as sl;
 import 'package:soywarmi_app/core/language/locales.dart';
 import 'package:soywarmi_app/firebase_options.dart';
@@ -12,7 +9,6 @@ import 'package:soywarmi_app/presentation/bloc/authentication_bloc/authenticatio
 import 'package:soywarmi_app/presentation/page/about_us_page.dart';
 import 'package:soywarmi_app/presentation/page/activities_page.dart';
 import 'package:soywarmi_app/presentation/page/complaint_page.dart';
-import 'package:soywarmi_app/presentation/page/chats_page.dart';
 import 'package:soywarmi_app/presentation/page/edit_profile_page.dart';
 import 'package:soywarmi_app/presentation/page/frequent_asked_questions_page.dart';
 import 'package:soywarmi_app/presentation/page/main_page.dart';
@@ -29,9 +25,6 @@ import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:soywarmi_app/utilities/nb_images.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-
-import 'data/remote/http_headers_global.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -120,30 +113,15 @@ class _MyAppState extends State<MyApp> {
 
 class _FirstPage extends StatelessWidget {
   const _FirstPage();
-  obtainUserData() async {
-    const storage = FlutterSecureStorage();
-    final endPoint = dotenv.env['API_ENDPOINT'];
-    final userToken = await storage.read(key: 'USER_TOKEN');
-    final req = await HttpHeadersGlobal.headerGetHttpWithToken(
-        userToken, '$endPoint/api/v1/get_my_account');
-    await storage.write(key: "my_account", value: jsonEncode(jsonDecode(req.body)["data"]));
-  }
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AuthenticationBloc, AuthenticationState>(
       listener: (context, state){
-        if (state is Authenticated) {
-          obtainUserData();
-        }
       },
       builder: (context, state) {
-        print("AUTH BLOC");
-        print(state);
         if (state is Authenticated) {
-
           return const MainPage();
         }
-
         if (state is Unauthenticated) {
           return const LoginPage();
         }

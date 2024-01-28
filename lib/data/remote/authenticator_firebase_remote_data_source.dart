@@ -2,9 +2,12 @@ import 'dart:convert';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:soywarmi_app/data/remote/user_public_general_remote_data_source.dart';
+
+import 'http_headers_global.dart';
 
 abstract class AuthenticatorFirebaseRemoteDataSource {
   AuthenticatorFirebaseRemoteDataSource()
@@ -25,6 +28,7 @@ const List<String> scopes = <String>[
 class EmailAuthenticatorFirebaseRemoteDataSourceImplementation
     extends AuthenticatorFirebaseRemoteDataSource {
   final storage = const FlutterSecureStorage();
+  final endPoint = dotenv.env['API_ENDPOINT'];
 
   @override
   Future<void> signIn({String? email, String? password}) async {
@@ -38,7 +42,14 @@ class EmailAuthenticatorFirebaseRemoteDataSourceImplementation
     );
 
     final userToken = await result.user!.getIdToken();
+
+    final req = await HttpHeadersGlobal.headerGetHttpWithToken(
+        userToken, '$endPoint/api/v1/get_my_account');
+
+
     final uuid = result.user!.uid;
+
+    await storage.write(key: "my_account", value: jsonEncode(jsonDecode(req.body)["data"]));
 
     await storage.write(key: 'USER_TOKEN', value: userToken);
     await storage.write(key: "UUID", value: uuid);
