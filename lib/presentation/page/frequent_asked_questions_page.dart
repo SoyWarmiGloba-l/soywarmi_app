@@ -24,7 +24,7 @@ class _FrequentAskedQuestionsPageState
         centerTitle: true,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: Text(
-          'FAQs',
+          '',
           style: TextStyle(color: Theme.of(context).primaryColor),
         ),
         leading: IconButton(

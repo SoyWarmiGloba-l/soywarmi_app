@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localization/flutter_localization.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:soywarmi_app/core/language/locales.dart';
 import 'package:soywarmi_app/presentation/bloc/authentication_bloc/authentication_bloc.dart';
 import 'package:soywarmi_app/presentation/widget/custom_button_menu.dart';
@@ -19,6 +23,8 @@ class _ProfileUserPageState extends State<ProfileUserPage> {
   late FlutterLocalization _flutterLocalization;
   late String _selectedLanguage;
   int _selectedIndex = 0;
+  final endPoint = dotenv.env['API_ENDPOINT'];
+
 
   @override
   void initState() {
@@ -26,8 +32,19 @@ class _ProfileUserPageState extends State<ProfileUserPage> {
     _flutterLocalization = FlutterLocalization.instance;
     _selectedLanguage = _flutterLocalization.currentLocale!.languageCode;
     print(_selectedLanguage);
+    obtainMyAccount();
   }
-
+  final storage = const FlutterSecureStorage();
+  Map<String,dynamic> myAccount={};
+  Future<void> obtainMyAccount() async {
+    final myAccountJson = await storage.read(key: 'my_account');
+    if (myAccountJson != null) {
+      setState(() {
+        myAccount=jsonDecode(myAccountJson);
+        print(myAccount);
+      });
+    }
+  }
   void setLocale(String? value) {
     if (value == null) return;
 
@@ -107,9 +124,9 @@ class _ProfileUserPageState extends State<ProfileUserPage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          const CircleAvatar(
+                          CircleAvatar(
                             radius: 35,
-                            backgroundImage: AssetImage(NbImageEmpty),
+                            backgroundImage: NetworkImage((myAccount.containsKey("photo") && myAccount["photo"]!=null)?'$endPoint${myAccount["photo"]}':"https://drive.google.com/file/d/12V8D0w45iG9NdaQxBPyssK2MQv7qpZ4M/view?usp=sharing"),
                           ),
                           const SizedBox(width: 20),
                           Column(
@@ -117,14 +134,14 @@ class _ProfileUserPageState extends State<ProfileUserPage> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                'Maria Gonzales',
+                                (myAccount.containsKey("name") && myAccount["name"]!=null)?myAccount["name"]:"",
                                 style: TextStyle(
                                   fontSize: 18,
                                   color: Theme.of(context).primaryColor,
                                 ),
                               ),
                               Text(
-                                'juan12@gmail.com',
+                                (myAccount.containsKey("email") && myAccount["email"]!=null)?myAccount["email"]:"",
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Theme.of(context)
