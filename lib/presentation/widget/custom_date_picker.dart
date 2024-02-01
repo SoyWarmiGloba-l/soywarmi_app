@@ -3,35 +3,35 @@ import 'package:intl/intl.dart';
 import 'package:soywarmi_app/utilities/nb_colors.dart';
 
 class CustomDatePicker extends StatefulWidget {
-  const CustomDatePicker({super.key});
+  DateTime selectedDate;
+  CustomDatePicker({super.key,required this.selectedDate});
 
   @override
   _CustomDatePickerState createState() => _CustomDatePickerState();
 }
 
 class _CustomDatePickerState extends State<CustomDatePicker> {
-  DateTime? selectedDate;
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime picked = (await showDatePicker(
           context: context,
-          initialDate: selectedDate ?? DateTime.now(),
+          initialDate: widget.selectedDate ?? DateTime.now(),
           firstDate: DateTime(2000),
           lastDate: DateTime(2101),
         )) ??
         DateTime.now();
 
-    if (picked != null && picked != selectedDate) {
+    if (picked != null && picked !=  widget.selectedDate) {
       setState(() {
-        selectedDate = picked;
+        widget.selectedDate = picked;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    String formattedDate = selectedDate != null
-        ? DateFormat.yMd().format(selectedDate!)
+    String formattedDate =  widget.selectedDate != null
+        ? DateFormat.yMd().format( widget.selectedDate!)
         : 'Seleccionar fecha';
 
     return Padding(
