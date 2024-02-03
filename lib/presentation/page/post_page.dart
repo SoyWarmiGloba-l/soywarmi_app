@@ -4,6 +4,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:pusher_client_fixed/pusher_client_fixed.dart';
 import 'package:soywarmi_app/domain/entity/publications_entity.dart';
 import 'package:soywarmi_app/presentation/widget/custom_comment.dart';
 import 'package:soywarmi_app/utilities/nb_colors.dart';
@@ -31,7 +32,45 @@ class _PostPageState extends State<PostPage> {
     // TODO: implement initState
     super.initState();
     obtainCommentsPublication();
+    connect();
+  }
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    pusher.unsubscribe("comentarios"+widget.publication.id.toString());
+    super.dispose();
+  }
+  late PusherClient pusher;
+  connect() async {
+    pusher = PusherClient(
+      'app-key', //default is 'app-key', change to production!
+      const PusherOptions(
 
+        host: '53c3-2800-cd0-1604-f000-9b25-348a-cfd2-5f9.ngrok-free.app', //you soketi server ip
+        wssPort: 443,
+        wsPort: 80, // port is 6001 by default
+        encrypted: true, // true for use SSL
+      ),
+      autoConnect: false,
+      enableLogging: true,
+    );
+    var uuid = widget.publication.id;
+    pusher.connect();
+    Channel channel3 = pusher.subscribe("comentarios"+uuid.toString());
+    channel3.bind("registro-comentario", (PusherEvent? event) {
+      print("OBTAIN COMMENTS PUBLICATION-------------------------------------------------------------------------------------------------------------");
+      obtainCommentsPublication();
+    });
+    pusher.onConnectionStateChange((state) {
+      print(
+          "previousState: ${state?.previousState}, currentState: ${state?.currentState}");
+      if (state?.currentState == 'CONNECTED') {
+        print("CONNECTING TO PUSHER EVENT");
+      }
+    });
+    pusher.onConnectionError((error) {
+      print("error: ${error?.exception}  ${error?.code} ${error?.message}");
+    });
   }
   TextEditingController controllerContentComment=TextEditingController();
   Widget build(BuildContext context) {
@@ -268,10 +307,11 @@ class _PostPageState extends State<PostPage> {
   List<CommentsModel> listCommentsModel=[];
   Future<void> obtainCommentsPublication() async {
     final userToken = await _storage.read(key: 'USER_TOKEN');
-    await HttpHeadersGlobal.headerGetHttpWithToken(userToken!, '$_endPoint/api/v1/comments/publication/5').then((res){
+    await HttpHeadersGlobal.headerGetHttpWithToken(userToken!, '$_endPoint/api/v1/comments/publication/${widget.publication.id}').then((res){
       if(res.statusCode==200){
         setState(() {
           comments=jsonDecode(res.body)['data'];
+          print(comments);
           if (comments.isNotEmpty) {
             setState(() {
               listCommentsModel = comments.map((e) => CommentsModel.fromJson(e)).toList();

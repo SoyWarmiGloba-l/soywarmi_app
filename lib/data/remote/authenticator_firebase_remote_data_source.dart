@@ -72,6 +72,8 @@ class EmailAuthenticatorFirebaseRemoteDataSourceImplementation
     );
     final userToken = await userCredential.user!.getIdToken();
     if(userCredential.user?.uid != null){
+      await storage.write(key: 'USER_TOKEN', value: userToken);
+
       UserPublicGeneralRemoteDataSourceImplementation upgrds=new UserPublicGeneralRemoteDataSourceImplementation();
         Map<String, dynamic> jsonData = {
           "name": nombre,
@@ -80,9 +82,10 @@ class EmailAuthenticatorFirebaseRemoteDataSourceImplementation
           "password": password,
         };
         String encode=jsonEncode(jsonData);
-        upgrds.postUser(encode);
-
-      await storage.write(key: 'USER_TOKEN', value: userToken);
+      upgrds.postUser(encode);
+      //final req = await HttpHeadersGlobal.headerGetHttpWithToken(
+      //    userToken, '$endPoint/api/v1/get_my_account');
+      //await storage.write(key: "my_account", value: jsonEncode(jsonDecode(req.body)["data"]));
     }
 
 

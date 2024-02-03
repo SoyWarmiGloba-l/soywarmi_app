@@ -109,8 +109,7 @@ class _ChatPageState extends State<ChatPage> {
     pusher = PusherClient(
       'app-key', //default is 'app-key', change to production!
       PusherOptions(
-
-        host: '88d2-2800-cd0-1604-f000-dddb-9198-18af-76e1.ngrok-free.app',
+        host: '53c3-2800-cd0-1604-f000-9b25-348a-cfd2-5f9.ngrok-free.app',
         wssPort: 443,
         wsPort: 80, // port is 6001 by default
         encrypted: true, // true for use SSL
@@ -125,8 +124,6 @@ class _ChatPageState extends State<ChatPage> {
       autoConnect: false,
       enableLogging: true,
     );
-    String uuid = 'c1fa8fb1-8598-4824-aeb5-fcc05c54ca11';
-    pusher.connect();
     Channel channel3 = pusher.subscribe("mensajes."+id);
     channel3.bind("registro-mensaje", (PusherEvent? event) {
       print(event?.data);
@@ -135,37 +132,6 @@ class _ChatPageState extends State<ChatPage> {
       //obtainMessagesConversation();
       print("Suscripción a 'mensajes de "+id);
     });
-    pusher.onConnectionStateChange((state) {
-      print(
-          "previousState: ${state?.previousState}, currentState: ${state?.currentState}");
-      if (state?.currentState == 'CONNECTED') {
-        print("CONNECTING TO PUSHER EVENT");
-
-        /*channel3.bind("registro-mensaje", (PusherEvent? event) {
-          print(event?.data);
-          checkMessagesRead();
-          obtainMessagesConversation();
-          //obtainMessagesConversation();
-          print("Suscripción a 'mensajes de "+id);
-        });*/
-        /*channel3.bind("pusher:subscription_succeeded", (PusherEvent? event) {
-          obtainMessagesConversation();
-          print("Suscripción a 'mensajes-publicos' exitosa");
-        });*/
-
-        /*channel3.bind("evento-mensaje", (PusherEvent? event) {
-          print("ESCUCHANDO EVENTO sin ID--------------------------------------------------------------------------------------------------------------");
-          obtainMessagesConversation();
-          print(event?.data);
-        });*/
-      }
-    });
-
-    pusher.onConnectionError((error) {
-      print("error: ${error?.exception}  ${error?.code} ${error?.message}");
-    });
-
-
   }
   @override
   Widget build(BuildContext context) {

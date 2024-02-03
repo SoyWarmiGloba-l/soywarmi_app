@@ -3,6 +3,8 @@ import 'package:flutter_localization/flutter_localization.dart';
 import 'package:lottie/lottie.dart';
 import 'package:soywarmi_app/core/language/locales.dart';
 
+import '../../data/model/notifications_model.dart';
+
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
 
@@ -11,8 +13,11 @@ class NotificationsPage extends StatefulWidget {
 }
 
 class _NotificationsPageState extends State<NotificationsPage> {
+  List<NotificationsModel> listNotifications=[];
   @override
   Widget build(BuildContext context) {
+    final dynamic args = ModalRoute.of(context)!.settings.arguments;
+    if (args is List<NotificationsModel>) listNotifications=args;
     return Scaffold(
       appBar: AppBar(
           elevation: 0,
@@ -37,7 +42,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
       body: Container(
         margin: const EdgeInsets.only(right: 20, left: 20),
         child: Center(
-            child: ListView(
+            child: (listNotifications.isEmpty)?ListView(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 children: [
@@ -59,7 +64,16 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     fontSize: 16,
                     color: Theme.of(context).primaryColor.withOpacity(0.5)),
               ),
-            ])),
+            ]):ListView.builder(
+              itemCount: listNotifications.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(listNotifications[index].title),
+                  subtitle: Text(listNotifications[index].data),
+                  // Otros atributos...
+                );
+              },
+            )),
       ),
     );
   }
