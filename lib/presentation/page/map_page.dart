@@ -142,7 +142,6 @@ class _MapPageState extends State<MapPage> {
       }
     }
   }
-
   Future<void> _getCurrentLocation() async {
     try {
       Position position = await Geolocator.getCurrentPosition(
@@ -335,12 +334,8 @@ class _MapPageState extends State<MapPage> {
                                 city['selected'] = false;
                               });
                               cities[index]['selected'] = value;
-
-                              // Cambiar la posición del mapa al seleccionar una ciudad
                               if (value == true) {
-                                mapController.animateCamera(
-                                    CameraUpdate.newLatLng(
-                                        cities[index]['coordinates']));
+                                moveCamera(cities[index]['coordinates']);
                               }
                             });
                             Navigator.pop(context);
@@ -378,6 +373,21 @@ class _MapPageState extends State<MapPage> {
                     target: camaraPosition,
                     zoom: 15.0,
                   ),
+                ),
+                Positioned(
+                  left: 0,
+                  right: width * 0.8,
+                  bottom: 120,
+                  child: FloatingActionButton(
+                    backgroundColor: NBSecondPrimaryColor,
+                    onPressed: () {
+                      _getCurrentLocation();
+                    },
+                    child: const Icon(
+                      Icons.account_circle,
+                      color: NBColorWhite,
+                    ),
+                  )
                 ),
                 Positioned(
                   left: 0,
@@ -467,10 +477,15 @@ class _MapPageState extends State<MapPage> {
       return CustomMakerMedicalCenter(medicalCenter).getMaker(context);
     });
 
+
     Future.wait<Marker>(markers).then((List<Marker> resolvedMarkers) {
       markersUploaded=true;
       setState(() {
         markersList = resolvedMarkers;
+        markersList.add(Marker(
+          markerId: const MarkerId("my_position"),
+          position: LatLng(camaraPosition.latitude, camaraPosition.longitude),
+        ));
       });
     }).catchError((error) {
       print('Error al cargar los marcadores: $error');
@@ -478,6 +493,13 @@ class _MapPageState extends State<MapPage> {
   }
   Future<void> obtenerFutureMakers(Iterable<Future<Marker>> markers) async {
     markersList= await Future.wait<Marker>(markers);
+
+
+  }
+
+  void moveCamera(LatLng position) {
+    mapController.animateCamera(
+        CameraUpdate.newLatLng(position));
   }
 }
 
