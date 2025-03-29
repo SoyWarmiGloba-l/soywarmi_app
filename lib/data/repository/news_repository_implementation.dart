@@ -23,7 +23,7 @@ class NewsRepositoryImplementation extends NewsRepository {
           id: e.id,
           title: e.title,
           description: e.description,
-          image: e.image,
+          images: e.images,
           startDate: e.startDate,
           endDate: e.endDate,
           areas: e.areas,

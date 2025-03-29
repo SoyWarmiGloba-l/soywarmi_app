@@ -15,7 +15,7 @@ class ActivityModel extends Equatable {
   final DateTime updatedAt;
   final DateTime? deletedAt;
   final EventType eventType;
-  final List<String> images;
+  final List<dynamic> images;
 
   const ActivityModel({
     required this.id,
@@ -38,7 +38,6 @@ class ActivityModel extends Equatable {
     final areas =jsonDecode(json['area']);
     final requirements = jsonDecode(json['requirement']) ;
 
-    print('steps: $steps, areas: $areas, requirements: $requirements');
 
     return ActivityModel(
       id: json['id'] as int,
@@ -46,19 +45,16 @@ class ActivityModel extends Equatable {
       name: json['name'] as String,
       description: json['description'] as String,
       endDate: json['end_date'] as String,
-      step: const ['Estar registrado en la plataforma', 'Tener 18 años'],
-      area: const ['Cultura', 'Deporte', 'Educación', 'Salud'],
+      step: [],
+      area: [],
       requirement: const ['Cédula de ciudadanía', 'Certificado de residencia'],
-      createdAt: DateTime.parse(json['created_at'] as String),
+      createdAt: json['created_at']!=null?DateTime.parse(json['created_at'] as String):DateTime.now(),
       updatedAt: DateTime.parse(json['updated_at'] as String),
       deletedAt: json['deleted_at'] != null
           ? DateTime.parse(json['deleted_at'] as String)
           : null,
       eventType: EventType.fromJson(json['event_type'] as Map<String, dynamic>),
-      images: (json['images'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          [],
+      images: json['images']??[],
     );
   }
 

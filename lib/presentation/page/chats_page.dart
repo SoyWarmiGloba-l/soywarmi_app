@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:pusher_client_fixed/pusher_client_fixed.dart';
 import 'package:soywarmi_app/domain/entity/chat_conversations_entity.dart';
@@ -10,36 +13,25 @@ import '../../core/inyection_container.dart';
 import '../../utilities/nb_colors.dart';
 import '../bloc/chat_conversations/get_chat_conversations_cubit.dart';
 import '../bloc/chat_conversations/get_chat_conversations_state.dart';
+
 class ChatsPage extends StatefulWidget {
   const ChatsPage({super.key});
 
   @override
   State<ChatsPage> createState() => _ChatsPageState();
 }
+
 class _ChatsPageState extends State<ChatsPage> {
   final _storage = const FlutterSecureStorage();
-  String uuid="";
+  String uuid = "";
+  late PusherClient pusher;
   _ChatsPageState();
   @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    connect();
-  }
-  Future<void> dispose() async {
-    // channel.unbind(eventName); // Replace with your event name
-    uuid = (await _storage.read(key: 'UUID')).toString();
-    pusher.unsubscribe("chat."+uuid!); // Replace with your channel name
-    //pusher.disconnect();
-    super.dispose();
-  }
-  late PusherClient pusher;
-
-  connect() async {
+  initState() {
     pusher = PusherClient(
-      'app-key', //default is 'app-key', change to production!
-      const PusherOptions(
-        host: '53c3-2800-cd0-1604-f000-9b25-348a-cfd2-5f9.ngrok-free.app', //you soketi server ip
+      'app-key',
+      PusherOptions(
+        host: '${dotenv.env["SOCKET_ENDPOINT"]}',
         wssPort: 443,
         wsPort: 80, // port is 6001 by default
         encrypted: true, // true for use SSL
@@ -47,53 +39,74 @@ class _ChatsPageState extends State<ChatsPage> {
       autoConnect: false,
       enableLogging: true,
     );
-    uuid = (await _storage.read(key: 'UUID')).toString();
-    Channel channel3 = pusher.subscribe("chat."+uuid!);
+    obtainMyAccount().then((value) => {
+      unsuscribeChat().then((value) => {connect()})
+    });
+    super.initState();
+  }
+  final storage = const FlutterSecureStorage();
+  Map<dynamic,dynamic> myAccount={
+    "name":""
+  };
+  Future<void> obtainMyAccount() async {
+    final myAccountJson = await storage.read(key: 'my_account');
+    if (myAccountJson != null) {
+      setState(() {
+        myAccount=jsonDecode(myAccountJson);
+      });
+    }
+  }
+  Future<void> unsuscribeChat() async {
+    var uuid = myAccount['id'];
+    pusher.unsubscribe("chat." + uuid!.toString());
+  }
+
+  connect() async {
+    uuid = myAccount["id"].toString();
+    Channel channel3 = pusher.subscribe("chat." + uuid!);
     channel3.bind("nuevos-mensajes-chat", (PusherEvent? event) {
-      print("-------------------------------------------------------------------------------------------------------------");
+      print(
+          "-------------------------------------------------------------------------------------------------------------");
       print(event?.data);
       sl<GetChatConversationsCubit>().getChatConversations();
     });
   }
-  List<ChatConversationsEntity> aux=[];
+
+  List<ChatConversationsEntity> aux = [];
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<GetChatConversationsCubit, GetChatConversationsState>(
-      bloc: sl<GetChatConversationsCubit>()..getChatConversations(),
-      builder: (context, state){
-        if (state is GetChatConversationsLoaded) {
-          aux=state.chat_conversations;
-          return ChatConversationsList(chatsList: state.chat_conversations);
-        }
+        bloc: sl<GetChatConversationsCubit>()..getChatConversations(),
+        builder: (context, state) {
+          if (state is GetChatConversationsLoaded) {
+            aux = state.chat_conversations;
+            return ChatConversationsList(chatsList: state.chat_conversations);
+          }
 
-        if (state is GetChatConversationsError) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.error_outline,
-                  color: Colors.blue,
-                  size: 100,
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Text(
-                  state.message,
-                  style: const TextStyle(color: Colors.blue, fontSize: 16),
-                ),
-              ],
-            ),
-          );
+          if (state is GetChatConversationsError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                      'No se pudo cargar las conversaciones, intente de nuevo'),
+                  IconButton(
+                    onPressed: () {
+                      sl<GetChatConversationsCubit>().getChatConversations();
+                    },
+                    icon: Icon(Icons.refresh,
+                        color: Theme.of(context).primaryColor),
+                  )
+                ],
+              ),
+            );
+          }
 
-        }
-
-        return ChatConversationsList(chatsList: aux);
-      }
-    );
+          return ChatConversationsList(chatsList: aux);
+        });
   }
 }
+
 class ChatConversationsList extends StatelessWidget {
   final List<ChatConversationsEntity> chatsList;
 
@@ -103,57 +116,58 @@ class ChatConversationsList extends StatelessWidget {
   );*/
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        ListView.builder(
-          itemCount: chatsList.length,
-          itemBuilder: (context, index) {
-            return ChatCard(chatsList[index]);
-          },
+    return Stack(children: [
+      ListView.builder(
+        itemCount: chatsList.length,
+        itemBuilder: (context, index) {
+          return ChatCard(chatsList[index]);
+        },
+      ),
+      Positioned(
+        bottom: 20,
+        right: 20,
+        child: Column(
+          children: [
+            Container(
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(100),
+                color: NBSecondPrimaryColor,
+              ),
+              child: IconButton(
+                color: Colors.white,
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => SearchPersonToChat()),
+                  );
+                },
+                icon: const Icon(Icons.person_add_alt_1, size: 32),
+              ),
+            ),
+            Container(
+              alignment: Alignment.center,
+              margin: EdgeInsets.only(top: 40),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(100),
+                color: NBSecondPrimaryColor,
+              ),
+              child: IconButton(
+                color: Colors.white,
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => SearchPeopleToGroup()),
+                  );
+                },
+                icon: const Icon(Icons.group_add, size: 32),
+              ),
+            ),
+          ],
         ),
-        Positioned(
-          bottom: 20,right: 20,
-          child: Column(
-            children: [
-              Container(
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(100),
-                  color: NBSecondPrimaryColor,
-                ),
-                child: IconButton(
-                  color: Colors.white,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => SearchPersonToChat()),
-                    );
-                  },
-                  icon: const Icon(Icons.person_add_alt_1, size: 32),
-                ),
-              ),
-              Container(
-                alignment: Alignment.center,
-                margin: EdgeInsets.only(top: 40),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(100),
-                  color: NBSecondPrimaryColor,
-                ),
-                child: IconButton(
-                  color: Colors.white,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => SearchPeopleToGroup()),
-                    );
-                  },
-                  icon: const Icon(Icons.group_add, size: 32),
-                ),
-              ),
-            ],
-          ),
-        )
-      ]
-    );
+      )
+    ]);
   }
 }

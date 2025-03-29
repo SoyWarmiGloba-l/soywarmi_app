@@ -13,7 +13,7 @@ class ActivityEntity extends Equatable {
   final DateTime updatedAt;
   final DateTime? deletedAt;
   final EventTypeEnity eventType;
-  final List<String> images;
+  final List<dynamic> images;
 
   const ActivityEntity({
     required this.id,

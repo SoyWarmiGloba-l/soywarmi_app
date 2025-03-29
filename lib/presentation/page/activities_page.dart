@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:soywarmi_app/core/inyection_container.dart';
-import 'package:soywarmi_app/domain/entity/activity_entity.dart';
 import 'package:soywarmi_app/presentation/bloc/activity/get_activity_cubit.dart';
 import 'package:soywarmi_app/presentation/bloc/activity/get_activity_state.dart';
 import 'package:soywarmi_app/utilities/nb_colors.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:soywarmi_app/utilities/nb_images.dart';
 import 'package:intl/intl.dart';
 
 class ActivitiesPage extends StatefulWidget {
@@ -17,6 +16,8 @@ class ActivitiesPage extends StatefulWidget {
 }
 
 class _ActivitiesPageState extends State<ActivitiesPage> {
+  final _endPoint = dotenv.env['API_ENDPOINT'];
+
   @override
   Widget build(BuildContext context) {
 
@@ -61,9 +62,6 @@ class _ActivitiesPageState extends State<ActivitiesPage> {
                 itemCount: activity.length,
                 itemBuilder: (context, index) {
                   final images = [
-                    'https://source.unsplash.com/random/800x600/?activity',
-                    'https://source.unsplash.com/random/800x600/?news',
-                    'https://source.unsplash.com/random/800x600/?meeting',
                   ];
                   return Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -135,7 +133,7 @@ class _ActivitiesPageState extends State<ActivitiesPage> {
                                                     color: Colors.amber,
                                                   ),
                                                   child: Image.network(
-                                                    item,
+                                                    '$_endPoint${item["url"]}',
                                                     fit: BoxFit.fill,
                                                   ),
                                                 );

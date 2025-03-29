@@ -11,7 +11,7 @@ class AuthenticationInitial extends AuthenticationState {}
 
 class Authenticated extends AuthenticationState {
   const Authenticated(this.user);
-  final UserEntity user;
+  final dynamic user;
 
   @override
   List<Object> get props => [user];

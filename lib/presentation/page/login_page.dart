@@ -205,13 +205,13 @@ class __LoginPageViewState extends State<_LoginPageView> {
                                   ),
                                 ],
                               ),
-                              GoogleButton(
+                              /*GoogleButton(
                                 title: LocaleData.iniciaSesionGoogle.getString(context),
                                 onPressed: () {
                                   BlocProvider.of<SignInCubit>(context)
                                       .signIn('google');
                                 },
-                              ),
+                              ),*/
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -256,6 +256,14 @@ class __LoginPageViewState extends State<_LoginPageView> {
                     value: 'es',
                     child: Text('Español'),
                   ),
+                  DropdownMenuItem<String>(
+                    value: 'quechua',
+                    child: Text('Quechua'),
+                  ),
+                  DropdownMenuItem<String>(
+                    value: 'guarani',
+                    child: Text('Guarani'),
+                  ),
                 ],
                 icon: Icon(Icons.language, color: Theme.of(context).primaryColor,
                     size: 30),
@@ -282,6 +290,10 @@ class __LoginPageViewState extends State<_LoginPageView> {
       _flutterLocalization.translate('es');
     } else if (value == 'ay') {
       _flutterLocalization.translate('ay');
+    } else if (value == 'quechua') {
+      _flutterLocalization.translate('quechua');
+    } else if (value == 'guarani') {
+      _flutterLocalization.translate('guarani');
     }
 
     setState(() {

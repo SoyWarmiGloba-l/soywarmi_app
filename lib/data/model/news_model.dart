@@ -15,13 +15,13 @@ class NewsModel extends Equatable {
   final DateTime updatedAt;
   final DateTime? deletedAt;
   final List<EventTypeModel> eventTypes;
-  final String image;
+  final List<dynamic> images;
 
   const NewsModel({
     required this.id,
     required this.title,
     required this.description,
-    required this.image,
+    required this.images,
     required this.startDate,
     required this.endDate,
     required this.areas,
@@ -34,17 +34,16 @@ class NewsModel extends Equatable {
 
   factory NewsModel.fromJson(Map<String, dynamic> json) {
     final areas = jsonDecode(json['areas'] as String) ;
-    
   return NewsModel(
     id: json['id'] as int,
     eventTypeId: json['event_type_id'] as int,
     title: json['title'] as String,
     description: json['description'] as String,
-    image: json['image'] ?? '',
+    images: json['images'] ?? [],
     startDate: json['start_date'] as String,
     endDate: json['end_date'] as String,
-    areas: areas.cast<String>(),
-    createdAt: DateTime.parse(json['created_at'] as String),
+    areas: [],
+    createdAt: (json['created_at']!=null)?DateTime.parse(json['created_at'] as String):DateTime.now(),
     updatedAt: DateTime.parse(json['updated_at'] as String),
     deletedAt: json['deleted_at'] != null
         ? DateTime.parse(json['deleted_at'] as String)
@@ -61,7 +60,7 @@ class NewsModel extends Equatable {
         id,
         title,
         description,
-        image,
+        images,
         startDate,
         endDate,
         areas,

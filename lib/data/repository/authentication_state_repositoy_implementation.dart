@@ -35,6 +35,8 @@ class AuthenticationStateRepositoryImplementation
       final userEntity = UserEntityAuth(
         id: userModel.id,
         email: userModel.email,
+        name: userModel.name,
+        lastname: userModel.lastname,
         password: userModel.password,
         rol: userModel.rol,
       );

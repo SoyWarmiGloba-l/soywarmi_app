@@ -13,6 +13,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../data/remote/http_headers_global.dart';
 import '../widget/custom_alerts.dart';
+import 'main_page.dart';
 
 class NewPostPage extends StatefulWidget {
   const NewPostPage({super.key});
@@ -26,14 +27,21 @@ class _NewPostPageState extends State<NewPostPage> {
   final TextEditingController _controllerDescription = TextEditingController();
   final _storage = const FlutterSecureStorage();
   final _endPoint = dotenv.env['API_ENDPOINT'];
-
+  final _formPostKey=GlobalKey<FormState>();
+  bool isPostRegistering=false;
   registrarPost() async {
+
     final userToken = await _storage.read(key: 'USER_TOKEN');
     await CustomAlerts.showConfirmationDialog(myWidgetKey.currentContext!).then((isConfirmed) async {
       if(isConfirmed){
+        setState(() {
+          isPostRegistering=true;
+        });
+        int isAnonymous=(_value=="Anonimo")?1:0;
         var body=jsonEncode({
           'title':_controllerTitle.text,
-          'content':_controllerDescription.text
+          'content':_controllerDescription.text,
+          "anonymous":isAnonymous
         });
         List<Map<String, String>>imagesRoutes=[];
         for(int i=0;i<_images.length;i++){
@@ -50,9 +58,13 @@ class _NewPostPageState extends State<NewPostPage> {
           }else{
             CustomAlerts.showSuccessDialog(context, "Registro correcto", "Publicacion registrada con exito!!!");
           }
+          setState(() {
+            isPostRegistering=false;
+          });
         });
       }
     });
+
   }
 
   List<File?> _images = [];
@@ -68,6 +80,7 @@ class _NewPostPageState extends State<NewPostPage> {
           leading: IconButton(
             onPressed: () {
               Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const MainPage(selectedIndex: 3)));
             },
             icon: Icon(Icons.cancel, color: Theme.of(context).primaryColor),
           ),
@@ -83,8 +96,13 @@ class _NewPostPageState extends State<NewPostPage> {
                   ),
                   child: GestureDetector(
                     onTap: (){
-                      registrarPost();
-
+                      if (_formPostKey.currentState!.validate()) {
+                        registrarPost();
+                      }else{
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Error ingrese los campos')),
+                        );
+                      }
                     },
                     child: Padding(
                       padding: const EdgeInsets.all(10),
@@ -100,7 +118,7 @@ class _NewPostPageState extends State<NewPostPage> {
             )
           ],
         ),
-        body: Column(children: [
+        body: (!isPostRegistering)?Column(children: [
           Row(
             children: [
               const Padding(
@@ -147,75 +165,90 @@ class _NewPostPageState extends State<NewPostPage> {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.only(left: 60, right: 10),
-              child: Column(
-                children: [
-                  TextField(
-                    controller: _controllerTitle,
-                    decoration: InputDecoration(
-                      hintText: LocaleData.cualEsTuPregunta.getString(context),
-                      hintStyle: TextStyle(
-                        color: Theme.of(context).primaryColor.withOpacity(0.5),
+              child: Form(
+                key: _formPostKey,
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: _controllerTitle,
+                      decoration: InputDecoration(
+                        hintText: LocaleData.cualEsTuPregunta.getString(context),
+                        hintStyle: TextStyle(
+                          color: Theme.of(context).primaryColor.withOpacity(0.5),
+                        ),
+                        border: InputBorder.none,
                       ),
-                      border: InputBorder.none,
-                    ),
-                    maxLines: null,
-                    maxLength: 100,
-                  ),
-                  TextField(
-                    controller: _controllerDescription,
-                    decoration: InputDecoration(
-                      hintText: LocaleData.descripcion.getString(context),
-                      hintStyle: TextStyle(
-                        color: Theme.of(context).primaryColor.withOpacity(0.5),
-                      ),
-                      border: InputBorder.none,
-                    ),
-                    maxLength: 800,
-                  ),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: _images.length,
-                      scrollDirection: Axis.vertical,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Container(
-                            width: 200,
-                            height: 300,
-                            child: Stack(
-                              children: [
-                                Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    image: DecorationImage(
-                                      image:
-                                          FileImage(_images[index]!, scale: 3),
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
-                                Positioned(
-                                  top: 5,
-                                  right: 5,
-                                  child: CircleAvatar(
-                                    child: IconButton(
-                                      icon: const Icon(Icons.close),
-                                      onPressed: () {
-                                        setState(() {
-                                          _images.removeAt(index);
-                                        });
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
+                      maxLines: null,
+                      maxLength: 100,
+                      validator: (value){
+                        if(value!.isEmpty){
+                          return "Ingrese un titulo";
+                        }
+                        return null;
                       },
                     ),
-                  ),
-                ],
+                    TextFormField(
+                      controller: _controllerDescription,
+                      decoration: InputDecoration(
+                        hintText: LocaleData.descripcion.getString(context),
+                        hintStyle: TextStyle(
+                          color: Theme.of(context).primaryColor.withOpacity(0.5),
+                        ),
+                        border: InputBorder.none,
+                      ),
+                      maxLength: 800,
+                      validator: (value){
+                        if(value!.isEmpty){
+                          return "La descripcion no puede estar vacia";
+                        }
+                        return null;
+                      },
+                    ),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: _images.length,
+                        scrollDirection: Axis.vertical,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Container(
+                              width: 200,
+                              height: 300,
+                              child: Stack(
+                                children: [
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      image: DecorationImage(
+                                        image:
+                                            FileImage(_images[index]!, scale: 3),
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    top: 5,
+                                    right: 5,
+                                    child: CircleAvatar(
+                                      child: IconButton(
+                                        icon: const Icon(Icons.close),
+                                        onPressed: () {
+                                          setState(() {
+                                            _images.removeAt(index);
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -261,6 +294,7 @@ class _NewPostPageState extends State<NewPostPage> {
               ],
             ),
           ),
-        ]));
+        ]):const Center(child: CircularProgressIndicator())
+    );
   }
 }

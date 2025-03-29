@@ -7,6 +7,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:soywarmi_app/data/remote/user_public_general_remote_data_source.dart';
 
+import 'conectivity_remote_data_source.dart';
 import 'http_headers_global.dart';
 
 abstract class AuthenticatorFirebaseRemoteDataSource {
@@ -28,70 +29,74 @@ const List<String> scopes = <String>[
 class EmailAuthenticatorFirebaseRemoteDataSourceImplementation
     extends AuthenticatorFirebaseRemoteDataSource {
   final storage = const FlutterSecureStorage();
-  final endPoint = dotenv.env['API_ENDPOINT'];
+  dynamic endPoint = dotenv.env['API_ENDPOINT'];
 
   @override
   Future<void> signIn({String? email, String? password}) async {
-    if (email == null || password == null) {
-      throw Exception('Error: User and password not provided');
-    }
+    endPoint = dotenv.env['API_ENDPOINT'];
+    try{
+      if (email == null || password == null) {
+        throw Exception('Error: User and password not provided');
+      }
 
-    final result = await _firebaseAuth.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+      final result = await _firebaseAuth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-    final userToken = await result.user!.getIdToken();
+      final userToken = await result.user!.getIdToken();
+      print(userToken);
+      final req = await HttpHeadersGlobal.headerGetHttpWithToken(
+          userToken, '$endPoint/api/v1/get_my_account');
+      print('$endPoint/api/v1/get_my_account');
+      print(req.body);
+      final uuid = result.user!.uid;
 
-    final req = await HttpHeadersGlobal.headerGetHttpWithToken(
-        userToken, '$endPoint/api/v1/get_my_account');
+      await storage.write(key: "my_account", value: jsonEncode(jsonDecode(req.body)["data"]));
 
-
-    final uuid = result.user!.uid;
-
-    await storage.write(key: "my_account", value: jsonEncode(jsonDecode(req.body)["data"]));
-
-    await storage.write(key: 'USER_TOKEN', value: userToken);
-    await storage.write(key: "UUID", value: uuid);
-
-
-    if (result.user == null) {
+      await storage.write(key: 'USER_TOKEN', value: userToken);
+      await storage.write(key: "UUID", value: uuid);
+    }catch(e){
       throw Exception('Error: User not found');
     }
   }
+  final _endPoint = dotenv.env['API_ENDPOINT'];
 
   @override
   Future<void> signUp({String? nombre, String? apellido,String? email,String? password}) async {
     if (email == null || password == null || nombre==null || apellido==null) {
       throw Exception('Error: User and password not provided');
     }
-
+    ConnectivityRemoteDataSourceImplementation conectivityRemoteDataSourceImplementation=ConnectivityRemoteDataSourceImplementation();
+    bool isConnectedWithBackend= await conectivityRemoteDataSourceImplementation.verifyConnectivity('$_endPoint/api/verify_connection');
+    if(!isConnectedWithBackend){
+      throw Exception('Error: User cannot be register');
+    }
     UserCredential userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
       email: email,
       password: password,
     );
-    final userToken = await userCredential.user!.getIdToken();
-    if(userCredential.user?.uid != null){
-      await storage.write(key: 'USER_TOKEN', value: userToken);
-
-      UserPublicGeneralRemoteDataSourceImplementation upgrds=new UserPublicGeneralRemoteDataSourceImplementation();
-        Map<String, dynamic> jsonData = {
-          "name": nombre,
-          "lastname": apellido,
-          "email": email,
-          "password": password,
-        };
-        String encode=jsonEncode(jsonData);
-      upgrds.postUser(encode);
-      //final req = await HttpHeadersGlobal.headerGetHttpWithToken(
-      //    userToken, '$endPoint/api/v1/get_my_account');
-      //await storage.write(key: "my_account", value: jsonEncode(jsonDecode(req.body)["data"]));
-    }
-
-
-    if (userCredential.user == null) {
+    if(userCredential.user?.uid == null){
+      print("Firebase error");
       throw Exception('Error: User cannot be register');
     }
+    final userToken = await userCredential.user!.getIdToken();
+    await storage.write(key: "UUID", value: userCredential.user?.uid);
+    await storage.write(key: 'USER_TOKEN', value: userToken);
+    UserPublicGeneralRemoteDataSourceImplementation upgrds=UserPublicGeneralRemoteDataSourceImplementation();
+    Map<String, dynamic> jsonData = {
+      "name": nombre,
+      "lastname": apellido,
+      "email": email,
+      "password": password,
+    };
+    String encode=jsonEncode(jsonData);
+    await upgrds.postUser(encode).then((value) async => {
+      if(value==null){
+        throw Exception('Error: User cannot be register')
+      },
+      await storage.write(key: "my_account", value: jsonEncode(value))
+    });
   }
 }
 

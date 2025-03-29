@@ -49,15 +49,16 @@ class AuthenticationBloc
       getUserResult.fold(
         (error) => emit(const Unauthenticated()),
         (user) {
+          bool existeUsuario=user!=null;
+          print("Esta autenticado"+(existeUsuario.toString()));
           if (user != null) {
+            print("emit Authenticated");
             emit(Authenticated(user));
           } else {
-            emit(const Unauthenticated());
+            emit(AuthenticationInitial());
           }
         },
       );
-    } else if (event.isAuthenticated && state is Unauthenticated) {
-      emit(AuthenticationInitial());
     } else {
       emit(const Unauthenticated());
     }

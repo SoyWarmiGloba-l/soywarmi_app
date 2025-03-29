@@ -9,9 +9,11 @@ class UserEntityAuth extends UserEntity {
   const UserEntityAuth({
     id,
     email,
+    name,
+    lastname,
     required this.password,
     required this.rol,
-  }):super(id: id,email: email);
+  }):super(id: id,email: email,name: name,lastname: lastname);
 
   @override
   List<Object?> get props => [id, email, password, rol];

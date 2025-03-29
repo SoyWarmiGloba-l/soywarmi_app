@@ -25,6 +25,9 @@ class AuthenticatorRepositoryImplementation extends AuthenticatorRepository {
   Future<Either<AuthenticationFailure, void>> signIn(String type,
       {String? email, String? password}) async {
     try {
+      print("TYPES AUTENTICATION----------------------------------------------------");
+      print(_authenticators);
+      print(type);
       final authenticator = _authenticators[type];
       if (authenticator != null) {
         final result =

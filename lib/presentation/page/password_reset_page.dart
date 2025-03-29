@@ -85,7 +85,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                       padding: const EdgeInsets.only(
                           right: 20, left: 20, top: 10, bottom: 20),
                       child: Text(
-                        'Ingresa tu direccion de correo electronico y te enviaremos un enlace para restablecer tu contraseña',
+                        'Ingresa tu direccion de correo electronico y te enviaremos un enlace a tu correo para restablecer tu contraseña espera unos minutos, busca en spam o vuelve a intentarlo',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 18,

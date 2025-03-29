@@ -36,6 +36,8 @@ class _SearchPeopleToGroupState extends State<SearchPeopleToGroup> {
       filteredPeople = users.map((e) => {
         "id":e.id,
         "email":e.email,
+        "name":e.name,
+        "lastname":e.lastname,
         "isSelected":false
       }).toList();
 
@@ -75,7 +77,8 @@ class _SearchPeopleToGroupState extends State<SearchPeopleToGroup> {
                             itemCount: filteredPeople.length,
                             itemBuilder: (context, index) {
                               return ListTile(
-                                title: Text(filteredPeople[index]["email"]),
+                                title: Text("${filteredPeople[index]["name"]} ${filteredPeople[index]["lastname"]}"),
+                                subtitle: Text(filteredPeople[index]["email"]),
                                 trailing: Checkbox(
                                   value: filteredPeople[index]["isSelected"],
                                   onChanged: (value) {
@@ -135,11 +138,13 @@ class _SearchPeopleToGroupState extends State<SearchPeopleToGroup> {
       List<UserEntity>? users = usersAux;
       if(users!=null){
         users= users.where((person) =>
-            person.email.toLowerCase().contains(searchController.text.toLowerCase()))
+            '${person.name.toLowerCase()} ${person.lastname.toLowerCase()}'.contains(searchController.text.toLowerCase()))
             .toList();
         filteredPeople = users.map((e) => {
           "id":e.id,
           "email":e.email,
+          "name":e.name,
+          "lastname":e.lastname,
           "isSelected":false
         }).toList();
 

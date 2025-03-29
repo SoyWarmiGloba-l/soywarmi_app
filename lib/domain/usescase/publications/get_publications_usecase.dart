@@ -11,6 +11,6 @@ class GetPublicatiosUseCase
   final PublicationsRepository publicationsRepository;
   @override
   Future<Either<PublicationsFailure, List<PublicationEntity>>> call(NoParams params) {
-    return publicationsRepository.getPublications();
+    return publicationsRepository.getRecentPublications();
   }
 }

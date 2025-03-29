@@ -170,7 +170,7 @@ class _MedicalCenterInfoState extends State<MedicalCenterInfo> {
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Text(
-                                '${formatTime.format(DateTime.parse(widget.medicalCenter.closingDate))}am ',
+                                '${formatTime.format(DateTime.parse(widget.medicalCenter.openingDate))}',
                                 style: const TextStyle(fontSize: 15),
                               ),
                             ),
@@ -189,7 +189,7 @@ class _MedicalCenterInfoState extends State<MedicalCenterInfo> {
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Text(
-                                '${formatTime.format(DateTime.parse(widget.medicalCenter.openingDate))}pm',
+                                '${formatTime.format(DateTime.parse(widget.medicalCenter.closingDate))}',
                                 style: const TextStyle(fontSize: 15),
                               ),
                             ),

@@ -15,7 +15,9 @@ class AuthenticationStatusChanged extends AuthenticationEvent {
   List<Object> get props => [isAuthenticated];
 }
 
-class SignOutRequested extends AuthenticationEvent {}
+class SignOutRequested extends AuthenticationEvent {
+
+}
 
 class MembershipUpdatedEvent extends AuthenticationEvent {
   final bool state;

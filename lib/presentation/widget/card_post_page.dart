@@ -2,17 +2,23 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localization/flutter_localization.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:soywarmi_app/core/language/locales.dart';
 import 'package:soywarmi_app/domain/entity/publications_entity.dart';
 import 'package:soywarmi_app/presentation/page/post_page.dart';
+import 'package:soywarmi_app/presentation/widget/image_max_screen.dart';
 
 import 'package:soywarmi_app/utilities/nb_colors.dart';
 import 'package:soywarmi_app/utilities/nb_images.dart';
 
-class CardPostPage extends StatelessWidget {
-  CardPostPage({super.key, required this.publication});
+import '../../data/remote/http_headers_global.dart';
+import 'custom_alerts.dart';
 
+class CardPostPage extends StatelessWidget {
+  CardPostPage({super.key, required this.publication,required this.idUser,required this.postsPageKey});
+  final String idUser;
   final PublicationEntity publication;
+  final GlobalKey postsPageKey;
   final _endPoint = dotenv.env['API_ENDPOINT'];
   @override
   Widget build(BuildContext context) {
@@ -23,40 +29,57 @@ class CardPostPage extends StatelessWidget {
         margin: const EdgeInsets.all(0),
         child: Column(children: [
           Row(children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: CircleAvatar(
-                radius: 25,
-                backgroundImage:AssetImage(publication.ownerPhoto),
+            Expanded(
+              flex:2,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: CircleAvatar(
+                  radius: 25,
+                  backgroundImage:NetworkImage((publication.ownerPhoto=="")?'$_endPoint/storage/default_image.png':"$_endPoint${publication.ownerPhoto}"),
+                ),
               ),
             ),
-            const SizedBox(width: 12),
-            Text(
-              publication.ownerName,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+            Expanded(
+              flex: 6,
+              child: Text(
+                publication.ownerName,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-            const Spacer(),
-            TextButton(
+            Expanded(
+              flex: 2,
+              child: TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => PostPage(
+                              publication: publication,
+                            )));
+                  },
+                  child: Text(
+                    LocaleData.ver.getString(context),
+                    style: TextStyle(color: Theme.of(context).primaryColor),
+                  )),
+            ),
+            (idUser==publication.personId.toString())?IconButton(
                 onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => PostPage(
-                            publication: publication,
-                          )));
+                  deletePost();
                 },
-                child: Text(
-                  LocaleData.ver.getString(context),
-                  style: TextStyle(color: Theme.of(context).primaryColor),
-                ))
+                icon: Icon(Icons.delete)
+            ):SizedBox()
           ]),
           (publication.title!="")?Container(
             alignment: Alignment.centerLeft,
             padding: const EdgeInsets.all(8.0),
             child: Text(
+              maxLines:2,
+              overflow:TextOverflow.ellipsis,
               publication.title,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
@@ -96,33 +119,43 @@ class CardPostPage extends StatelessWidget {
             itemBuilder: (context, index, realIndex) {
               final image = publication.images[index];
 
-              return Stack(
-                children: [
-                  Container(
-                    width: MediaQuery.of(context).size.width,
-                    margin: const EdgeInsets.symmetric(horizontal: 5.0),
-                    decoration: const BoxDecoration(
-                        color: Colors.amber,
-                        borderRadius: BorderRadius.all(Radius.circular(10))),
-                    child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Image.network('$_endPoint$image', fit: BoxFit.cover)),
-                  ),
-                  Positioned(
-                    top: 5,
-                    right: 5,
-                    child: CircleAvatar(
-                        radius: 15,
-                        backgroundColor: Theme.of(context).primaryColor,
-                        child: Text(
-                          '${index + 1}',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.white,
-                          ),
-                        )),
-                  ),
-                ],
+              return GestureDetector(
+                onTap: (){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ImageMaxScreen(urlImage: '$_endPoint$image'),
+                    ),
+                  );
+                },
+                child: Stack(
+                  children: [
+                    Container(
+                      width: MediaQuery.of(context).size.width,
+                      margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                      decoration: const BoxDecoration(
+                          color: Colors.amber,
+                          borderRadius: BorderRadius.all(Radius.circular(10))),
+                      child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.network('$_endPoint$image', fit: BoxFit.cover)),
+                    ),
+                    Positioned(
+                      top: 5,
+                      right: 5,
+                      child: CircleAvatar(
+                          radius: 15,
+                          backgroundColor: Theme.of(context).primaryColor,
+                          child: Text(
+                            '${index + 1}',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.white,
+                            ),
+                          )),
+                    ),
+                  ],
+                ),
               );
             },
           ):const SizedBox(),
@@ -147,7 +180,6 @@ class CardPostPage extends StatelessWidget {
                     ),
                   ],
                 ),*/
-                const SizedBox(width: 16),
                 Row(
                   children: [
                     Icon(
@@ -214,5 +246,20 @@ class CardPostPage extends StatelessWidget {
         ]),
       ),
     );
+  }
+  final _storage = const FlutterSecureStorage();
+  Future<void> deletePost() async {
+    final userToken = await _storage.read(key: 'USER_TOKEN');
+    CustomAlerts.showConfirmationDialog(postsPageKey.currentContext!).then((value) async => {
+      if(value){
+        await HttpHeadersGlobal.headerDeleteHttpWithToken(userToken!, '$_endPoint/api/v1/publications/${publication.id}').then((res){
+          if(res.statusCode==200){
+            CustomAlerts.showSuccessDialog(postsPageKey.currentContext!, "Publicacion eliminada","Publicacion eliminada exitosamente");
+          }else{
+            CustomAlerts.showErrorDialog(postsPageKey.currentContext!, "Error al eliminar publicacion");
+          }
+        })
+      }
+    });
   }
 }

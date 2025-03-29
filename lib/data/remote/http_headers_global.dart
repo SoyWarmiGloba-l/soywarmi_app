@@ -21,7 +21,22 @@ class HttpHeadersGlobal {
         body: body);
     return req;
   }
-
+  static Future<http.Response> headerPostHttp(url, body) async {
+    http.Response req = await http.post(Uri.parse(url),
+        headers: <String, String>{
+          "Content-Type": 'application/json',
+        },
+        body: body);
+    return req;
+  }
+  static Future<http.Response> headerDeleteHttpWithToken(token, url) async {
+    http.Response req = await http.delete(Uri.parse(url),
+        headers: <String, String>{
+          "Content-Type": 'application/json',
+          "Authorization": 'Bearer $token',
+        },);
+    return req;
+  }
   static Future<http.StreamedResponse> headerPostHttpWithTokenMultipart(String token,String url,String body,List<Map<String, String>>files) async {
     var request = http.MultipartRequest('POST', Uri.parse(url));
     request.headers['Authorization'] = 'Bearer $token';

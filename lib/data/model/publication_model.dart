@@ -31,7 +31,7 @@ class PublicationModel extends Equatable {
 
     return PublicationModel(
       id: json['id'] as int,
-      ownerPhoto: json['person']['photo'] as String,
+      ownerPhoto: json['person']['photo'] ?? "",
       ownerName: '${json['person']['name']} ${json['person']['lastname']} ${json['person']['mother_lastname']}',
       personId: json['person_id'] as int,
       title: json['title'] as String,

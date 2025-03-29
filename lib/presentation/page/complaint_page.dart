@@ -15,13 +15,13 @@ class ComplaintPage extends StatefulWidget {
 class _ComplaintPageState extends State<ComplaintPage> {
   final TextEditingController _controller = TextEditingController();
 
-  final String _recipientEmail = 'montanoj47@gmail.com';
+  final String _recipientEmail = 'soywarmiglobal.edu@gmail.com';
 
   Future<void> _sendEmail(String subject, String body) async {
     final Email email = Email(
         body: body,
         subject: subject,
-        recipients: ['montanoj47@gmail.com'],
+        recipients: ['soywarmiglobal.edu@gmail.com'],
         cc: [''],
         bcc: [''],
         isHTML: false);
@@ -174,7 +174,7 @@ class _ComplaintPageState extends State<ComplaintPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      /*const Text(
                         'Tipo de denuncia',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
@@ -257,7 +257,7 @@ class _ComplaintPageState extends State<ComplaintPage> {
                         ),
                         maxLines: 10,
                         maxLength: 100,
-                      ),
+                      ),*/
                       const Text(
                         'Comunicate con nosotros',
                         style: TextStyle(
@@ -305,10 +305,7 @@ class _ComplaintPageState extends State<ComplaintPage> {
                           color: Theme.of(context).primaryColor,
                         ),
                         onTap: () {
-                          final Uri _emailLaunchUri = Uri(
-                            scheme: 'mailto',
-                            path: 'montanoj47@gmail.com',
-                          );
+                          final Uri _emailLaunchUri = Uri.parse("mailto:soywarmiglobal.edu@gmail.com?subject=Denuncia&body=Hola quiero hacer una denuncia, necesito ayuda");
 
                           if (_emailLaunchUri != null) {
                             launchUrl(_emailLaunchUri);
@@ -330,8 +327,28 @@ class _ComplaintPageState extends State<ComplaintPage> {
                         onTap: () {
                           final Uri phoneLaunchUri = Uri(
                             scheme: 'tel',
-                            path: '123456789',
+                            path: '73309063',
                           );
+
+                          if (phoneLaunchUri != null) {
+                            launchUrl(phoneLaunchUri);
+                          }
+                        },
+                      ),
+                      ListTile(
+                        leading: CircleAvatar(
+                            backgroundColor: NbSecondSecondaryColor,
+                            child: Icon(
+                              FontAwesomeIcons.whatsapp,
+                              color: Theme.of(context).primaryColor,
+                            )),
+                        title: const Text('WHATSAPP'),
+                        trailing: Icon(
+                          Icons.arrow_forward_ios,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                        onTap: () {
+                          final Uri phoneLaunchUri = Uri.parse('https://api.whatsapp.com/send/?phone=59173309063&text=Hola quiero hacer una denuncia, necesito ayuda');
 
                           if (phoneLaunchUri != null) {
                             launchUrl(phoneLaunchUri);
@@ -345,14 +362,14 @@ class _ComplaintPageState extends State<ComplaintPage> {
               const SizedBox(
                 height: 15,
               ),
-              CustomButton(
+              /*CustomButton(
                   label: 'Enviar denuncia',
                   onPressed: () {
                     _sendEmail(
                       'Denuncia de ${_selectedType!['name']}',
                       _controller.text,
                     );
-                  })
+                  })*/
             ],
           ),
         ));

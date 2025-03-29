@@ -14,8 +14,8 @@ class CustomMakerMedicalCenter {
 
   @override
   Future<Marker> getMaker(context) async {
-    const iconMedicalCenter='assets/icons/icon_medical_center.png';
-    const sizeIcon=100;
+    const iconMedicalCenter='assets/icons/icon_hospital_maker.png';
+    const sizeIcon=400;
 
     return Marker(
       markerId: MarkerId(medicalCenterEntity.id.toString()),

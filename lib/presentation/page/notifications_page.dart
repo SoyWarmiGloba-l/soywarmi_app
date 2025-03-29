@@ -1,9 +1,16 @@
+import 'dart:convert';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localization/flutter_localization.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:lottie/lottie.dart';
 import 'package:soywarmi_app/core/language/locales.dart';
 
 import '../../data/model/notifications_model.dart';
+import '../../data/remote/http_headers_global.dart';
+import '../widget/custom_alerts.dart';
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -14,11 +21,17 @@ class NotificationsPage extends StatefulWidget {
 
 class _NotificationsPageState extends State<NotificationsPage> {
   List<NotificationsModel> listNotifications=[];
+  GlobalKey<_NotificationsPageState> notificationPage=GlobalKey();
+  @override
+  void initState() {
+    // TODO: implement initState
+    obtainNotificationsNotRead();
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
-    final dynamic args = ModalRoute.of(context)!.settings.arguments;
-    if (args is List<NotificationsModel>) listNotifications=args;
     return Scaffold(
+      key: notificationPage,
       appBar: AppBar(
           elevation: 0,
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -33,13 +46,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
             },
             icon: Icon(Icons.arrow_back, color: Theme.of(context).primaryColor),
           ),
-          actions: [
-            IconButton(
-              onPressed: () {},
-              icon: Icon(Icons.delete, color: Theme.of(context).primaryColor),
-            ),
-          ]),
-      body: Container(
+      ),
+      body: (notificationsLoaded)?Container(
         margin: const EdgeInsets.only(right: 20, left: 20),
         child: Center(
             child: (listNotifications.isEmpty)?ListView(
@@ -67,14 +75,75 @@ class _NotificationsPageState extends State<NotificationsPage> {
             ]):ListView.builder(
               itemCount: listNotifications.length,
               itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(listNotifications[index].title),
-                  subtitle: Text(listNotifications[index].data),
-                  // Otros atributos...
+                return Row(
+                  children: [
+                    Expanded(
+                      flex: 8,
+                      child: ListTile(
+                        title: Text(listNotifications[index].title),
+                        subtitle: Text(listNotifications[index].data),
+                        // Otros atributos...
+                      ),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: IconButton(
+                          onPressed: (){
+                            deleteNotification(listNotifications[index].id);
+
+                          },
+                          icon: Icon(Icons.delete)
+                      ),
+                    )
+                  ],
                 );
               },
             )),
-      ),
+      ):const Center(child: CircularProgressIndicator()),
     );
+  }
+  final _endPoint = dotenv.env['API_ENDPOINT'];
+  final _storage = const FlutterSecureStorage();
+  Future<void> deleteNotification(notificationId) async {
+    final userToken = await _storage.read(key: 'USER_TOKEN');
+    CustomAlerts.showConfirmationDialog(notificationPage.currentContext!).then((value) async => {
+      if(value){
+        await HttpHeadersGlobal.headerDeleteHttpWithToken(userToken!, '$_endPoint/api/v1/delete_my_notification/$notificationId').then((res){
+          if(res.statusCode==200){
+            CustomAlerts.showSuccessDialog(notificationPage.currentContext!, "Notificacion eliminada","Notificacion eliminada exitosamente");
+            obtainNotificationsNotRead();
+
+          }else{
+            CustomAlerts.showErrorDialog(notificationPage.currentContext!, "Error al eliminar notificacion");
+          }
+        })
+      }
+    });
+  }
+  bool notificationsLoaded=false;
+  Future<void> obtainNotificationsNotRead() async {
+    final userToken = await _storage.read(key: 'USER_TOKEN');
+    await HttpHeadersGlobal.headerGetHttpWithToken(userToken!,
+        '$_endPoint/api/v1/notifications/my-notifications-not-read')
+        .then((res) {
+      if (res.statusCode == 200) {
+        setState(() {
+          List comments = jsonDecode(res.body)['data'];
+          if (comments.isNotEmpty) {
+            setState(() {
+              listNotifications = comments
+                  .map((e) => NotificationsModel.fromJson(e['notifications']))
+                  .toList();
+            });
+          }
+        });
+      } else {
+        CustomAlerts.showErrorDialog(
+            context, "Error al obtener los comentarios");
+      }
+      setState(() {
+        notificationsLoaded=true;
+      });
+    });
   }
 }

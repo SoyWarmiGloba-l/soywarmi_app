@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:soywarmi_app/core/language/locales.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:soywarmi_app/presentation/bloc/register/register_state.dart';
@@ -13,6 +14,7 @@ import 'package:soywarmi_app/utilities/nb_images.dart';
 import '../../data/remote/authenticator_firebase_remote_data_source.dart';
 import '../../data/repository/authenticator_repository_implementation.dart';
 import '../../domain/usescase/auth/register_usecase.dart';
+import '../../main.dart';
 import '../../utilities/screen_size_util.dart';
 import '../bloc/authentication_bloc/authentication_bloc.dart';
 import '../bloc/register/register_cubit.dart';
@@ -75,16 +77,15 @@ class __RegisterPageState extends State<_RegisterPage> {
                 "STATE----------------------------------------------------------------------------------------");
             print(state);
             if (state is RegisterSuccess) {
-              context
-                  .read<AuthenticationBloc>()
-                  .add(const AuthenticationStatusChanged(true));
+              context.read<AuthenticationBloc>().add(const AuthenticationStatusChanged(true));
+              //AuthenticationState as=context.read<AuthenticationBloc>().state;
+
+              Navigator.pushNamed(context, '/home');
+              //Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const FirstPage()));
             }
           },
           builder: (context, state) {
-            if (state is RegisterSuccess) {
-              Navigator.pop(context);
-            }
-            if (state is RegisterLoading) {
+            if (state is RegisterLoading || state is RegisterSuccess) {
               return Center(
                 child: CircularProgressIndicator(
                   color: Theme.of(context).primaryColor,
@@ -104,9 +105,9 @@ class __RegisterPageState extends State<_RegisterPage> {
                         height: 160,
                         width: 250,
                       ),
-                      const Text(
-                        'Crea tu cuenta',
-                        style: TextStyle(
+                      Text(
+                        LocaleData.crearTuCuenta.getString(context),
+                        style: const TextStyle(
                             fontSize: 38,
                             fontWeight: FontWeight.bold,
                             color: NBPrimaryColor),
@@ -115,13 +116,13 @@ class __RegisterPageState extends State<_RegisterPage> {
                       Form(
                         key: _formRegisterKey,
                         child: Column(children: [
-                          getTextFieldRegister(context, "Correo", correo),
-                          getTextFieldRegister(context, "Nombre", nombre),
-                          getTextFieldRegister(context, "Apellido", apellido),
+                          getTextFieldRegister(context, LocaleData.correoElectronico.getString(context), correo),
+                          getTextFieldRegister(context, LocaleData.nombre.getString(context), nombre),
+                          getTextFieldRegister(context, LocaleData.apellido.getString(context), apellido),
                           getTextFieldPassowrdRegister(
-                              context, "Contrasenia", contrasenia),
+                              context, LocaleData.contrasena.getString(context), contrasenia),
                           getTextFieldPassowrdRegister(
-                              context, "Contrasenia", confirmar_contrasenia),
+                              context, LocaleData.contrasena.getString(context), confirmar_contrasenia),
                         ]),
                       ),
                       Padding(
@@ -129,7 +130,7 @@ class __RegisterPageState extends State<_RegisterPage> {
                           top: 20,
                         ),
                         child: CustomButton(
-                          label: 'Crear cuenta',
+                          label: LocaleData.crearCuenta.getString(context),
                           onPressed: () {
                             if (_formRegisterKey.currentState!.validate()) {
                               _formRegisterKey.currentState!.save();
@@ -147,7 +148,7 @@ class __RegisterPageState extends State<_RegisterPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('¿Ya tienes cuenta?',
+                          Text(LocaleData.yaTienesCuenta.getString(context),
                               style: TextStyle(
                                   color: Theme.of(context)
                                       .primaryColorDark
@@ -156,9 +157,9 @@ class __RegisterPageState extends State<_RegisterPage> {
                             onTap: () {
                               Navigator.of(context).pop();
                             },
-                            child: const Text(
-                              ' Inicia Sesión',
-                              style: TextStyle(
+                            child: Text(
+                              LocaleData.inicioSesion.getString(context),
+                              style: const TextStyle(
                                 color: NBSecondPrimaryColor,
                                 fontWeight: FontWeight.bold,
                               ),

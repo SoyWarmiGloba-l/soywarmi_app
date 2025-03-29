@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:soywarmi_app/core/inyection_container.dart';
 import 'package:soywarmi_app/domain/entity/news_entity.dart';
 import 'package:soywarmi_app/presentation/bloc/news/get_news_cubit.dart';
 import 'package:soywarmi_app/presentation/bloc/news/get_news_state.dart';
 import 'package:soywarmi_app/presentation/page/news_details_screen.dart';
 import 'package:soywarmi_app/utilities/nb_colors.dart';
-import 'package:soywarmi_app/utilities/nb_images.dart';
+
+import '../../core/language/locales.dart';
 
 class NewsPage extends StatefulWidget {
   const NewsPage({super.key});
@@ -23,8 +25,8 @@ class _NewsPageState extends State<NewsPage> {
       appBar: AppBar(
         backgroundColor: NBColorWhite,
         elevation: 0,
-        title: const Text('Noticias SoyWarmi',
-            style: TextStyle(color: NBPrimaryColor)),
+        title: Text(LocaleData.noticiasSoyWarmi.getString(context),
+            style: const TextStyle(color: NBPrimaryColor)),
         iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
       ),
       body: BlocBuilder<GetNewsCubit, GetNewsState>(
@@ -90,72 +92,74 @@ class NewsList extends StatelessWidget {
 class NewsCard extends StatelessWidget {
   final NewsEntity news;
   final VoidCallback onPressed;
+  final _endPoint = dotenv.env['API_ENDPOINT'];
 
-  const NewsCard({super.key, required this.news, required this.onPressed});
+  NewsCard({super.key, required this.news, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onPressed,
-      child: Card(
-        elevation: 3,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        margin: const EdgeInsets.only(bottom: 20, left: 10, right: 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              height: 200,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: news.image == ''
-                      ? const NetworkImage(
-                          'https://source.unsplash.com/random/800x600/?activity')
-                      : NetworkImage(news.image) as ImageProvider,
-                  fit: BoxFit.cover,
-                ),
+    return Card(
+      elevation: 3,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      margin: const EdgeInsets.only(bottom: 20, left: 10, right: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            height: 200,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: news.images.isEmpty
+                    ? NetworkImage(
+                    '$_endPoint/storage/default_image.png')
+                    : NetworkImage('$_endPoint${news.images[0]["url"]}'),
+                fit: BoxFit.cover,
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Text(
-                news.title,
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: Text(
+              news.title,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
+              style:
+                  const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Text(
-                news.description,
-                style: const TextStyle(fontSize: 16),
-              ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: Text(
+              news.description,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 4,
+              style: const TextStyle(fontSize: 16),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Row(
-                children: [
-                  Text(
-                    news.startDate,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey,
-                    ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: Row(
+              children: [
+                Text(
+                  news.startDate,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey,
                   ),
-                  const Spacer(),
-                  TextButton(
-                      onPressed: () {},
-                      child: const Text(
-                        'Ver más',
-                        style: TextStyle(color: NBPrimaryColor),
-                      )),
-                ],
-              ),
+                ),
+                const Spacer(),
+                TextButton(
+                    onPressed: onPressed,
+                    child: const Text(
+                      'Ver más',
+                      style: TextStyle(color: NBPrimaryColor),
+                    )),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

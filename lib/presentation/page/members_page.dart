@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:soywarmi_app/core/inyection_container.dart';
 import 'package:soywarmi_app/domain/entity/member_entity.dart';
 import 'package:soywarmi_app/presentation/bloc/team/get_teams_cubit.dart';
@@ -19,6 +20,7 @@ class _MembersPageState extends State<MembersPage> {
   final TextEditingController _searchController = TextEditingController();
 
   List<MemberEntity> _filteredTeams = []; // Lista filtrada de equipos
+  final _endPoint = dotenv.env['API_ENDPOINT'];
 
   @override
   Widget build(BuildContext context) {
@@ -61,9 +63,9 @@ class _MembersPageState extends State<MembersPage> {
 
                     return GridView.builder(
                       gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
+                      SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
-                        childAspectRatio: 0.8,
+                        childAspectRatio: (MediaQuery.of(context).size.width>800)?2:0.8,
                         crossAxisSpacing: 10,
                         mainAxisSpacing: 10,
                       ),
@@ -75,6 +77,8 @@ class _MembersPageState extends State<MembersPage> {
                             ? _filteredTeams[index]
                             : teams[index];
                         return Container(
+                          height: 200,
+                          padding: EdgeInsets.symmetric(horizontal: 5),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(10),
                             color: NbSecondSecondaryColor,
@@ -99,20 +103,21 @@ class _MembersPageState extends State<MembersPage> {
                                 CircleAvatar(
                                   radius: 50,
                                   backgroundColor: Colors.white,
-                                  backgroundImage:
-                                      Image.network(team.photo).image,
+                                  backgroundImage:NetworkImage((team.photo=='')?'$_endPoint/storage/default_image.png':'$_endPoint${team.photo}'),
                                 ),
                                 const SizedBox(height: 10),
-                                Text(
-                                  team.name,
-                                  maxLines: 2,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyLarge!
-                                      .copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        height: 1.5,
-                                      ),
+                                Center(
+                                  child: Text(
+                                    team.name,
+                                    maxLines: 2,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyLarge!
+                                        .copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          height: 1.5,
+                                        ),
+                                  ),
                                 ),
                                 const SizedBox(height: 5),
                                 Text(

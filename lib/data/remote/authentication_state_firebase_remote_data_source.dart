@@ -29,7 +29,7 @@ class AuthenticationFirebaseRemoteDataSourceImplementation
   final GoogleSignIn _googleSignIn;
 
   final storage = const FlutterSecureStorage();
-  final endPoint = dotenv.env['API_ENDPOINT'];
+  dynamic endPoint = dotenv.env['API_ENDPOINT'];
 
   @override
   Stream<bool> get isAuthenticated async* {
@@ -55,23 +55,33 @@ class AuthenticationFirebaseRemoteDataSourceImplementation
 
   @override
   Future<UserModelAuth?> get user async {
+    endPoint = dotenv.env['API_ENDPOINT'];
     final user = _firebaseAuth.currentUser;
     print('User token ${await user?.getIdToken()}');
+    print(user);
     if (user != null) {
       final token=await user.getIdToken();
       final uuid=user.uid;
       await storage.write(key: "UUID", value: uuid);
       await storage.write(key: 'USER_TOKEN', value: token);
-      final req = await HttpHeadersGlobal.headerGetHttpWithToken(
-          token, '$endPoint/api/v1/get_my_account');
-      await storage.write(key: "my_account", value: jsonEncode(jsonDecode(req.body)["data"]));
+      print("uuid y token almacenados");
+      try{
+        final req = await HttpHeadersGlobal.headerGetHttpWithToken(
+            token, '$endPoint/api/v1/get_my_account');
+        await storage.write(key: "my_account", value: jsonEncode(jsonDecode(req.body)["data"]));
+        return UserModelAuth(
+          id: json.decode(req.body)["data"]["id"],
+          name: json.decode(req.body)["data"]["name"],
+          lastname: json.decode(req.body)["data"]["lastname"],
+          email: user.email!,
+          password: '',
+          rol: '',
+        );
+      }catch(e){
 
-      return UserModelAuth(
-        id: user.uid,
-        email: user.email!,
-        password: '',
-        rol: '',
-      );
+        throw Exception('Error: User cannot be register');
+      }
+
     }
 
     return null;

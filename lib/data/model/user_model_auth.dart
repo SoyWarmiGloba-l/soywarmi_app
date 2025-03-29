@@ -8,15 +8,17 @@ class UserModelAuth extends UserModel {
   const UserModelAuth({
     id,
     email,
+    name,
+    lastname,
     required this.password,
     required this.rol,
-  }) : super(id: id, email: email);
+  }) : super(id: id, email: email,name:name,lastname: lastname);
 
   @override
   List<Object?> get props => [id, email, password, rol];
 
   factory UserModelAuth.fromJson(Map<String, dynamic> json) => UserModelAuth(
-        id: json['id'] as String,
+        id: json['id'] as int,
         email: json['email'] as String,
         password: json['password'] as String,
         rol: json['rol'] as String,

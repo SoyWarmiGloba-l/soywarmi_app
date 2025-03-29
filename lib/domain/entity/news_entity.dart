@@ -12,13 +12,13 @@ class NewsEntity extends Equatable {
   final DateTime updatedAt;
   final DateTime? deletedAt;
   final List<EventTypeEntity> eventTypes;
-  final String image;
+  final List<dynamic> images;
 
   const NewsEntity({
     required this.id,
     required this.title,
     required this.description,
-    required this.image,
+    required this.images,
     required this.startDate,
     required this.endDate,
     required this.areas,
@@ -34,7 +34,7 @@ class NewsEntity extends Equatable {
         id,
         title,
         description,
-        image,
+        images,
         startDate,
         endDate,
         areas,

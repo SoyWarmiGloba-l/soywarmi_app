@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:soywarmi_app/domain/entity/news_entity.dart';
-import 'package:soywarmi_app/presentation/widget/custom_app_bar.dart';
 import 'package:soywarmi_app/utilities/nb_colors.dart';
-import 'package:soywarmi_app/utilities/nb_images.dart';
+
+import '../../core/language/locales.dart';
 
 class NewsDetailsScreen extends StatelessWidget {
-  const NewsDetailsScreen({super.key, required this.news});
+  NewsDetailsScreen({super.key, required this.news});
 
   final NewsEntity news;
+  final _endPoint = dotenv.env['API_ENDPOINT'];
 
   @override
   Widget build(BuildContext context) {
@@ -15,8 +18,8 @@ class NewsDetailsScreen extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: NBColorWhite,
           elevation: 0,
-          title: const Text(
-            'Detalle de la noticia',
+          title: Text(
+            LocaleData.detalle.getString(context),
             style: TextStyle(color: NBPrimaryColor),
           ),
           iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
@@ -29,10 +32,10 @@ class NewsDetailsScreen extends StatelessWidget {
                 height: 200,
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                    image: news.image == ''
-                        ? const NetworkImage(
-                            'https://source.unsplash.com/random/800x600/?news')
-                        : NetworkImage(news.image) as ImageProvider,
+                    image: news.images.isEmpty
+                        ? NetworkImage(
+                            '$_endPoint/storage/default_image.png')
+                        : NetworkImage('$_endPoint${news.images[0]["url"]}'),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -75,7 +78,7 @@ class NewsDetailsScreen extends StatelessWidget {
                     const SizedBox(height: 8),
                     Wrap(
                         spacing: 8,
-                        children: news.areas
+                        children: (news.areas.isNotEmpty)?news.areas
                             .map((e) => Container(
                                   margin: const EdgeInsets.only(
                                       right: 8, bottom: 8),
@@ -95,7 +98,7 @@ class NewsDetailsScreen extends StatelessWidget {
                                     ),
                                   ),
                                 ))
-                            .toList()),
+                            .toList():[]),
                   ],
                 ),
               ),

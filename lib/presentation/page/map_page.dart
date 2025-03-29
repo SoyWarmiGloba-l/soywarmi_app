@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -12,6 +13,7 @@ import 'package:soywarmi_app/presentation/page/medical_center_info.dart';
 
 import 'package:soywarmi_app/utilities/nb_colors.dart';
 
+import '../../core/language/locales.dart';
 import '../widget/custom_maker.dart';
 
 class MapPage extends StatefulWidget {
@@ -410,9 +412,9 @@ class _MapPageState extends State<MapPage> {
                         final res = FaqsRemoteDataSourceImplementation();
                         final data = res.getFaqs();
                       },
-                      child: const Text(
-                        'Cambiar ciudad',
-                        style: TextStyle(fontSize: 10),
+                      child: Text(
+                        LocaleData.cambiarCiudad.getString(context),
+                        style: const TextStyle(fontSize: 10),
                       ),
                     ),
                   ),
@@ -436,9 +438,9 @@ class _MapPageState extends State<MapPage> {
                       onPressed: () async {
                         _showModalNearestHospitalsl(context, state.medicalCenters);
                       },
-                      child: const Text(
-                        'Mostrar mas cercanos',
-                        style: TextStyle(fontSize: 10),
+                      child: Text(
+                        LocaleData.hospitalesCercanos.getString(context),
+                        style: const TextStyle(fontSize: 10),
                       ),
                     ),
                   ),

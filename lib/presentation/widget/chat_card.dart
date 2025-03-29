@@ -8,7 +8,7 @@ class ChatCard extends StatelessWidget {
 
   final ChatConversationsEntity chatConversation;
 
-  ChatCard(this.chatConversation);
+  const ChatCard(this.chatConversation, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,73 +26,80 @@ class ChatCard extends StatelessWidget {
                   color: NbSecondSecondaryColor.withOpacity(0.5), width: 1.0)),
         ),
         child: Row(children: [
-          const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: CircleAvatar(
-              radius: 25,
-              backgroundImage: AssetImage(NbImageEmpty),
+          const Expanded(
+            flex: 2,
+            child: Padding(
+              padding: EdgeInsets.all(8.0),
+              child: CircleAvatar(
+                radius: 25,
+                backgroundImage: AssetImage(NbImageEmpty),
+              ),
             ),
           ),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                chatConversation.name.length > 25
-                    ? "${chatConversation.name.substring(0, 25)}..."
-                    : chatConversation.name,
-                style: const TextStyle(
-                  fontSize: 18,
-                ),
-              ),
-              Text(
-                (chatConversation.last_message==null)?"":chatConversation.last_message.length > 25
-                  ? "${chatConversation.last_message.substring(0, 25)}..."
-                      : chatConversation.last_message,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Theme.of(context).primaryColor.withOpacity(0.5),
-                ),
-              ),
-            ],
-          ),
-          const Spacer(),
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
+          Expanded(
+            flex: 6,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                (chatConversation.unread_messages_count!=0)?
-                Container(
-                  padding: const EdgeInsets.all(1),
-                  decoration: BoxDecoration(
-                    color: NBSecondPrimaryColor,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  constraints: const BoxConstraints(
-                    minWidth: 18,
-                    minHeight: 18,
-                  ),
-                  child: Text(
-                    chatConversation.unread_messages_count.toString(),
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ):Container(),
-                const SizedBox(height: 8),
                 Text(
-                    (chatConversation.last_message_date==null)?"":chatConversation.last_message_date.toString(),
+                  chatConversation.name,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  style: const TextStyle(
+                    fontSize: 18,
+                  ),
+                ),
+                Text(
+                  chatConversation.last_message,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 14,
                     color: Theme.of(context).primaryColor.withOpacity(0.5),
                   ),
                 ),
               ],
+            ),
+          ),
+          Expanded(
+            flex: 4,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  (chatConversation.unread_messages_count!=0)?
+                  Container(
+                    padding: const EdgeInsets.all(1),
+                    decoration: BoxDecoration(
+                      color: NBSecondPrimaryColor,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 18,
+                      minHeight: 18,
+                    ),
+                    child: Text(
+                      chatConversation.unread_messages_count.toString(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ):Container(),
+                  const SizedBox(height: 8),
+                  Text(
+                      (chatConversation.last_message_date==null)?"":chatConversation.last_message_date.toString(),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).primaryColor.withOpacity(0.5),
+                    ),
+                  ),
+                ],
+              ),
             ),
           )
         ]),

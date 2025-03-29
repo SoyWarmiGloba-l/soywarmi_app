@@ -18,7 +18,7 @@ class UsersRepositoryImplementation extends UserRepository {
       final userModel = await userRemoteDataSource.getUsers();
 
       final listUsers =
-          userModel.map((e) => UserEntity(id: e.id, email: e.email)).toList();
+          userModel.map((e) => UserEntity(id: e.id, email: e.email, lastname: e.lastname, name: e.name)).toList();
 
       return Right(listUsers);
     } on Exception {

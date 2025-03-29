@@ -45,7 +45,7 @@ class PublicationsRepositoryImplementation extends PublicationsRepository {
               title: publication.title,
               content: publication.content,
               anonymous: publication.anonymous,
-              ownerPhoto: (publication.anonymous==1)?NbImageEmpty:publication.ownerPhoto,
+              ownerPhoto: (publication.anonymous==1)?"":publication.ownerPhoto,
               ownerName: (publication.anonymous==1)?"Anonimo":publication.ownerName,
               numberComments: publication.numberComments,
               images: publication.images))
@@ -55,7 +55,28 @@ class PublicationsRepositoryImplementation extends PublicationsRepository {
       return left(PublicationsFailure('Error al obtener las publicaciones'));
     }
   }
-
+  @override
+  Future<Either<PublicationsFailure, List<PublicationEntity>>>
+  getRecentPublications() async {
+    try {
+      final publications = await publicationRemoteDataSource.getRecentPublications();
+      final publicationsEntity = publications
+          .map((publication) => PublicationEntity(
+          id: publication.id,
+          personId: publication.personId,
+          title: publication.title,
+          content: publication.content,
+          anonymous: publication.anonymous,
+          ownerPhoto: (publication.anonymous==1)?"":publication.ownerPhoto,
+          ownerName: (publication.anonymous==1)?"Anonimo":publication.ownerName,
+          numberComments: publication.numberComments,
+          images: publication.images))
+          .toList();
+      return right(publicationsEntity);
+    } on Exception {
+      return left(PublicationsFailure('Error al obtener las publicaciones'));
+    }
+  }
   @override
   Future<Either<PublicationsFailure, void>> updatePublication(
       PublicationEntity publication) {

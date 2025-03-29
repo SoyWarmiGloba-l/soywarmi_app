@@ -10,6 +10,7 @@ import 'http_headers_global.dart';
 
 abstract class PublicationRemoteDataSource {
   Future<List<PublicationModel>> getPublications();
+  Future<List<PublicationModel>> getRecentPublications();
   Future<PublicationModel> getPublication(int id);
   Future<void> createPublication(PublicationModel publication);
   Future<void> updatePublication(PublicationModel publication);
@@ -47,7 +48,27 @@ class PublicationRemoteDaraSourceImplementation
       throw Exception('Error al obtener los datos');
     }
   }
+  @override
+  Future<List<PublicationModel>> getRecentPublications() async {
+    final userToken = await _storage.read(key: 'USER_TOKEN');
+    final req = await HttpHeadersGlobal.headerGetHttpWithToken(
+        userToken, '$_endPoint/api/v1/recent_publications');
 
+    if (req.statusCode == 200) {
+      final publicationsResponse = jsonDecode(req.body);
+      final List<dynamic> listPublications = publicationsResponse['data'];
+
+      if (listPublications.isNotEmpty) {
+        final List<PublicationModel> listPublicationsModel =
+        listPublications.map((e) => PublicationModel.fromJson(e)).toList();
+        return listPublicationsModel;
+      } else {
+        return [];
+      }
+    } else {
+      throw Exception('Error al obtener los datos');
+    }
+  }
   @override
   Future<List<PublicationModel>> getPublications() async {
     final userToken = await _storage.read(key: 'USER_TOKEN');

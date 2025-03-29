@@ -1,7 +1,8 @@
 import 'dart:convert';
-
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:soywarmi_app/core/inyection_container.dart';
@@ -26,6 +27,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final _endPoint = dotenv.env['API_ENDPOINT'];
 
   @override
   void initState() {
@@ -92,20 +94,20 @@ class _HomePageState extends State<HomePage> {
               left: 20,
             ),
             child: SizedBox(
-              height: MediaQuery.of(context).size.height * 0.3,
+              height: 200,
               child: BlocBuilder<GetNewsCubit, GetNewsState>(
                 bloc: sl<GetNewsCubit>()..getNews(),
                 builder: (context, state) {
                   if (state is GetNewsLoaded) {
                     final news = state.news;
-
+                    final numberNewsToShow=(news.length>10)?10:news.length;
                     return ListView.builder(
                       scrollDirection: Axis.horizontal,
-                      itemCount: 10,
+                      itemCount: numberNewsToShow,
                       itemBuilder: (context, index) {
                         final newData = news[index];
                         return Container(
-                          width: MediaQuery.of(context).size.width * 0.5,
+                          width: 220,
                           margin: const EdgeInsets.only(right: 10),
                           child: InkWell(
                             onTap: () {
@@ -120,13 +122,14 @@ class _HomePageState extends State<HomePage> {
                               children: [
                                 ImageContainer(
                                   width:
-                                      MediaQuery.of(context).size.width * 0.5,
-                                  imageUrl: newData.image,
+                                      220,
+                                  imageUrl: (newData.images.isNotEmpty)?'$_endPoint${newData.images[0]["url"]}':'$_endPoint/storage/default_image.png',
                                 ),
                                 const SizedBox(height: 10),
                                 Text(
                                   newData.title,
-                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
                                   style: Theme.of(context)
                                       .textTheme
                                       .bodyLarge!
@@ -135,7 +138,7 @@ class _HomePageState extends State<HomePage> {
                                           height: 1.5),
                                 ),
                                 const SizedBox(height: 5),
-                                Text('Hace ${DateTime.now().hour} horas',
+                                Text('Publicado ${DateFormat('dd-MM-yyyy HH:mm').format(newData.createdAt)}',
                                     style:
                                         Theme.of(context).textTheme.bodySmall),
                                 const SizedBox(height: 5),
@@ -246,12 +249,13 @@ class _HomePageState extends State<HomePage> {
                                   CircleAvatar(
                                       radius: 50,
                                       backgroundColor: Colors.white,
-                                      backgroundImage:
-                                          Image.network(member.photo).image),
+                                      backgroundImage: NetworkImage((member.photo=='')?'$_endPoint/storage/default_image.png':'$_endPoint${member.photo}')
+                                  ),
                                   const SizedBox(height: 10),
                                   Text(
                                     member.name,
                                     maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
                                     style: Theme.of(context)
                                         .textTheme
                                         .bodyLarge!
@@ -259,11 +263,11 @@ class _HomePageState extends State<HomePage> {
                                             fontWeight: FontWeight.bold,
                                             height: 1.5),
                                   ),
-                                  const SizedBox(height: 5),
+                                  /*const SizedBox(height: 5),
                                   Text('Voluntaria',
                                       style: Theme.of(context)
                                           .textTheme
-                                          .bodySmall),
+                                          .bodySmall),*/
                                 ],
                               ),
                             ),
@@ -307,14 +311,14 @@ class _HomePageState extends State<HomePage> {
                 builder: (context, state) {
                   if (state is GetActivityLoaded) {
                     final activity = state.activity;
-
+                    final numberActivitiesToShow=(activity.length>10)?10:activity.length;
                     return ListView.builder(
                       scrollDirection: Axis.horizontal,
-                      itemCount: 10,
+                      itemCount: numberActivitiesToShow,
                       itemBuilder: (context, index) {
                         final activityData = activity[index];
                         return Container(
-                          width: MediaQuery.of(context).size.width * 0.5,
+                          width: 220,
                           margin: const EdgeInsets.only(right: 10),
                           child: InkWell(
                             onTap: () {},
@@ -323,16 +327,16 @@ class _HomePageState extends State<HomePage> {
                               children: [
                                 //carrusel
                                 ImageContainer(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.5,
+                                  width:220,
                                   imageUrl: activityData.images.isEmpty
-                                      ? ''
-                                      : activityData.images.first,
+                                      ? '$_endPoint/storage/default_image.png'
+                                      : '$_endPoint${activityData.images[0]['url']}',
                                 ),
                                 const SizedBox(height: 10),
                                 Text(
                                   activityData.name,
                                   maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
                                   style: Theme.of(context)
                                       .textTheme
                                       .bodyLarge!
@@ -341,7 +345,7 @@ class _HomePageState extends State<HomePage> {
                                           height: 1.5),
                                 ),
                                 const SizedBox(height: 5),
-                                Text('Hace ${DateTime.now().hour} horas',
+                                Text('Publicado ${DateFormat('dd-MM-yyyy HH:mm').format(activityData.createdAt)}',
                                     style:
                                         Theme.of(context).textTheme.bodySmall),
                                 const SizedBox(height: 5),

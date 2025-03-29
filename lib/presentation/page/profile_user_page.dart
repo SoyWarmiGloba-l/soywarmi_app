@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -7,10 +8,14 @@ import 'package:flutter_localization/flutter_localization.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:soywarmi_app/core/language/locales.dart';
 import 'package:soywarmi_app/presentation/bloc/authentication_bloc/authentication_bloc.dart';
+import 'package:soywarmi_app/presentation/page/login_page.dart';
+import 'package:soywarmi_app/presentation/page/main_page.dart';
 import 'package:soywarmi_app/presentation/widget/custom_button_menu.dart';
 import 'package:soywarmi_app/utilities/nb_colors.dart';
 import 'package:soywarmi_app/utilities/nb_images.dart';
 import 'package:soywarmi_app/utilities/screen_size_util.dart';
+
+import '../../main.dart';
 
 class ProfileUserPage extends StatefulWidget {
   const ProfileUserPage({super.key});
@@ -24,6 +29,7 @@ class _ProfileUserPageState extends State<ProfileUserPage> {
   late String _selectedLanguage;
   int _selectedIndex = 0;
   final endPoint = dotenv.env['API_ENDPOINT'];
+   FlutterSecureStorage storage = const FlutterSecureStorage();
 
 
   @override
@@ -34,7 +40,6 @@ class _ProfileUserPageState extends State<ProfileUserPage> {
     print(_selectedLanguage);
     obtainMyAccount();
   }
-  final storage = const FlutterSecureStorage();
   Map<String,dynamic> myAccount={};
   Future<void> obtainMyAccount() async {
     final myAccountJson = await storage.read(key: 'my_account');
@@ -126,7 +131,7 @@ class _ProfileUserPageState extends State<ProfileUserPage> {
                         children: [
                           CircleAvatar(
                             radius: 35,
-                            backgroundImage: NetworkImage((myAccount.containsKey("photo") && myAccount["photo"]!=null)?'$endPoint${myAccount["photo"]}':"https://drive.google.com/file/d/12V8D0w45iG9NdaQxBPyssK2MQv7qpZ4M/view?usp=sharing"),
+                            backgroundImage: NetworkImage((myAccount.containsKey("photo") && myAccount["photo"]!=null && myAccount["photo"]!="")?'$endPoint${myAccount["photo"]}':"$endPoint/storage/default_image.png"),
                           ),
                           const SizedBox(width: 20),
                           Column(
@@ -258,11 +263,11 @@ class _ProfileUserPageState extends State<ProfileUserPage> {
                               ),
                             ),
                             onPressed: () {
-                              Navigator.of(context).pop();
+                              logOut().then((value){
+                                Navigator.of(context).pop();
+                                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const FirstPage()));
+                              });
                               // context.read<AuthCubit>().logout();
-                              context
-                                  .read<AuthenticationBloc>()
-                                  .add(SignOutRequested());
                             },
                             child:  Text(
                               LocaleData.cerrarSesion.getString(context),
@@ -304,5 +309,16 @@ class _ProfileUserPageState extends State<ProfileUserPage> {
                 ]),
           ),
         ));
+  }
+
+  Future<void> logOut() async {
+    await storage.deleteAll();
+    FirebaseAuth firebaseAuth=FirebaseAuth.instance;
+    firebaseAuth.signOut();
+    storage.deleteAll();
+    context
+        .read<AuthenticationBloc>()
+        .add(const AuthenticationStatusChanged(false));
+
   }
 }

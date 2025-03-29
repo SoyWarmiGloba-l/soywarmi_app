@@ -1,3 +1,4 @@
+import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -35,6 +36,15 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   runApp(const MyApp());
+  /*runApp(
+    DevicePreview(
+      enabled: true,
+      tools: [
+        ...DevicePreview.defaultTools,
+      ],
+      builder: (context) => MyApp(),
+    ),
+  );*/
 }
 
 class MyApp extends StatefulWidget {
@@ -76,6 +86,9 @@ class _MyAppState extends State<MyApp> {
         ),
       ],
       child: MaterialApp(
+        //useInheritedMediaQuery: true,
+        //locale: DevicePreview.locale(context),
+        //builder: DevicePreview.appBuilder,
         debugShowCheckedModeBanner: false,
         theme: AppThemeData.theme,
         localizationsDelegates: localization.localizationsDelegates,
@@ -89,7 +102,7 @@ class _MyAppState extends State<MyApp> {
                 splashIconSize: 100,
                 splashTransition: SplashTransition.slideTransition,
                 backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                nextScreen: const _FirstPage(),
+                nextScreen: const FirstPage(),
               ),
           '/register': (context) => const RegisterPage(),
           '/forgot_password': (context) => const PasswordResetPage(),
@@ -110,15 +123,20 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
+class FirstPage extends StatefulWidget {
+  const FirstPage({super.key});
 
-class _FirstPage extends StatelessWidget {
-  const _FirstPage();
+  @override
+  State<FirstPage> createState() => _FirstPageState();
+}
+
+class _FirstPageState extends State<FirstPage>  {
+  _FirstPageState();
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<AuthenticationBloc, AuthenticationState>(
-      listener: (context, state){
-      },
+    return BlocBuilder<AuthenticationBloc, AuthenticationState>(
       builder: (context, state) {
+        print("Cambio de estado"+state.toString());
         if (state is Authenticated) {
           return const MainPage();
         }

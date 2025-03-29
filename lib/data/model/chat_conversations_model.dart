@@ -23,10 +23,10 @@ class ChatConversationsModel extends Equatable{
     return ChatConversationsModel(
       id_chat_conversation: json['id_chat_conversation'] as int,
       id_type_chat_conversations: json['id_type_chat_conversations'] as int,
-      name: json['name'] as String,
-      unread_messages_count: json['unread_messages_count'] as int,
-      last_message: json['last_message'] as dynamic,
-      last_message_date: json['last_message_date'] as dynamic,
+      name: json['name'] ?? "" as String,
+      unread_messages_count: json['unread_messages_count']??0 as int,
+      last_message: json['last_message']??"" as dynamic,
+      last_message_date: json['last_message_date']??DateTime.now() as dynamic,
 
     );
   }

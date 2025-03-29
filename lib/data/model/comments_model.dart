@@ -38,7 +38,7 @@ class CommentsModel extends Equatable {
           ? DateTime.parse(json['deleted_at'] as String)
           : null,
       ownerName: (json.containsKey("person") && json['person']!=null)?json["person"]["name"]:'Anonimo',
-      ownerPhoto: (json.containsKey("photo") && json['photo']!='')?'$endPoint${json["person"]["photo"]}':'https://drive.google.com/file/d/12V8D0w45iG9NdaQxBPyssK2MQv7qpZ4M/view?usp=sharing',
+      ownerPhoto: (json.containsKey("person") && json['person']!='')?'$endPoint${json["person"]["photo"]}':'',
     );
   }
 

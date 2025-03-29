@@ -36,8 +36,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   void initState() {
     // TODO: implement initState
-    super.initState();
     obtainMyAccount();
+    super.initState();
   }
   final storage = const FlutterSecureStorage();
   final _endPoint = dotenv.env['API_ENDPOINT'];
@@ -103,9 +103,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(100),
                           image: (!editedImage)?DecorationImage(
-                            image: myAccount["photo"] == '' || myAccount["photo"]==null || !myAccount.containsKey("photo")
-                                ? const NetworkImage('https://drive.google.com/file/d/12V8D0w45iG9NdaQxBPyssK2MQv7qpZ4M')
-                                : NetworkImage('$_endPoint${myAccount['photo']}') as ImageProvider,
+                            image: NetworkImage((myAccount["photo"]=="")?'$_endPoint/storage/default_image.png':"$_endPoint${myAccount["photo"]}"),
                             fit: BoxFit.cover,
                           ):DecorationImage(image: FileImage(imageProfile!)),
                         ),
@@ -235,6 +233,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final _storage = const FlutterSecureStorage();
 
   Future<void> updateProfileData() async {
+    if(name.text.isEmpty || lastname.text.isEmpty){
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('El nombre y el apellido no pueden ser vacios')),
+      );
+      return;
+    }
     final id=myAccount['id'];
     final userToken = await _storage.read(key: 'USER_TOKEN');
     await CustomAlerts.showConfirmationDialog(myWidgetKey.currentContext!).then((isConfirmed) async {
@@ -247,6 +251,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
           "gender":gender,
           "phone":phone.text
         });
+        print(body);
+        print('$_endPoint/api/v1/update_user/$id');
         List<Map<String, String>>imagesRoutes=[];
         if(imageProfile!=null)imagesRoutes.add({"name":"photo1", "path":imageProfile!.path});
         await HttpHeadersGlobal.headerPostHttpWithTokenMultipart(userToken!, '$_endPoint/api/v1/update_user/$id',body,imagesRoutes).then((res) async {

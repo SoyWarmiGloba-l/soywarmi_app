@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:soywarmi_app/core/inyection_container.dart';
 import 'package:soywarmi_app/domain/entity/doctor_entity.dart';
 import 'package:soywarmi_app/presentation/bloc/doctor/get_doctor_cubit.dart';
@@ -7,6 +8,8 @@ import 'package:soywarmi_app/presentation/bloc/doctor/get_doctor_state.dart';
 import 'package:soywarmi_app/presentation/page/doctor_info_page.dart';
 import 'package:soywarmi_app/presentation/widget/custom_text_field.dart';
 import 'package:soywarmi_app/presentation/widget/doctor_card.dart';
+
+import '../../core/language/locales.dart';
 
 class SpecialistsPage extends StatefulWidget {
   const SpecialistsPage({Key? key}) : super(key: key);
@@ -36,7 +39,7 @@ class _SpecialistsPageState extends State<SpecialistsPage> {
               const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 2),
           child: CustomTextField(
             controller: _searchController,
-            label: 'Buscar....',
+            label: LocaleData.buscarDoctor.getString(context),
             colored: true,
             onChanged: (_) {
               setState(() {

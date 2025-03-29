@@ -87,7 +87,8 @@ class _SearchPersonToChatState extends State<SearchPersonToChat> {
                             },
                             builder: (context,state){
                               return ListTile(
-                                title: Text(filteredPeople[index].email),
+                                title: Text("${filteredPeople[index].name} ${filteredPeople[index].lastname}"),
+                                subtitle: Text(filteredPeople[index].email),
                                 onTap: () {
                                   emailPersonSelected=filteredPeople[index].email;
                                   sl<CreateChatConversationCubit>().createChatConversation(
@@ -120,9 +121,8 @@ class _SearchPersonToChatState extends State<SearchPersonToChat> {
     setState(() {
       final users = usersAux;
       if(users!=null){
-        filteredPeople = users
-            .where((person) =>
-            person.email.toLowerCase().contains(searchController.text.toLowerCase()))
+        filteredPeople= users.where((person) =>
+            '${person.name.toLowerCase()} ${person.lastname.toLowerCase()}'.contains(searchController.text.toLowerCase()))
             .toList();
       }
     });

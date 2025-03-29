@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:pusher_client_fixed/pusher_client_fixed.dart';
 import 'package:soywarmi_app/core/language/locales.dart';
 import 'package:soywarmi_app/presentation/page/chats_page.dart';
 import 'package:soywarmi_app/presentation/page/home_page.dart';
 import 'package:soywarmi_app/presentation/page/map_page.dart';
+import 'package:soywarmi_app/presentation/page/new_post_page.dart';
 import 'package:soywarmi_app/presentation/page/posts_page.dart';
 import 'package:soywarmi_app/presentation/page/specialists_page.dart';
 import 'package:soywarmi_app/presentation/widget/custom_app_bar.dart';
@@ -38,8 +40,9 @@ class _MainPageState extends State<MainPage> {
   connectSocketi() async {
     pusher = PusherClient(
       'app-key', //default is 'app-key', change to production!
-      const PusherOptions(
-        host: '53c3-2800-cd0-1604-f000-9b25-348a-cfd2-5f9.ngrok-free.app', //you soketi server ip
+       PusherOptions(
+        //host: '${dotenv.env["SOCKET_ENDPOINT"]}',
+         host: '${dotenv.env["SOCKET_ENDPOINT"]}',
         wssPort: 443,
         wsPort: 80, // port is 6001 by default
         encrypted: true, // true for use SSL
@@ -70,7 +73,7 @@ class _MainPageState extends State<MainPage> {
     ];
     return Scaffold(
       appBar: CustomAppBar(
-        title: _titles[_selectedIndex],
+        title: "Soy warmi",
       ),
       body: IndexedStack(
         index: _selectedIndex,
@@ -86,7 +89,11 @@ class _MainPageState extends State<MainPage> {
           ? FloatingActionButton(
               backgroundColor: NBSecondPrimaryColor,
               onPressed: () {
-                Navigator.pushNamed(context, '/new_post');
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const NewPostPage()),
+                );
               },
               child: const Icon(
                 Icons.add,

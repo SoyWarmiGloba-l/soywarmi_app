@@ -52,6 +52,25 @@ class CustomAlerts{
       },
     );
   }
+  static void showInfoDialog(BuildContext context, String title,String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
   static void showErrorDialog(BuildContext context, String errorMessage) {
     showDialog(
       context: context,
